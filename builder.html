@@ -625,6 +625,8 @@
       let connectFromBranch = null;
       let connectPointer = null;
       let suppressCanvasCancelOnce = false;
+      let draftSaveTimer = null;
+      let canvasRenderRaf = null;
       const DRAFT_KEY = "fedflow:builder:draft";
       const PUBLISHED_KEY = "fedflow:builder:published";
       const FLOWS_KEY = "fedflow:flows";
@@ -678,7 +680,7 @@
         document.getElementById("flowCount").textContent = `${flow.length} actions / ${edges.length} links`;
       }
 
-      function saveDraft() {
+      function persistDraftNow() {
         localStorage.setItem(
           DRAFT_KEY,
           JSON.stringify({
@@ -690,6 +692,28 @@
             updatedAt: new Date().toISOString()
           })
         );
+      }
+
+      function saveDraft(immediate = false) {
+        if (immediate) {
+          if (draftSaveTimer) clearTimeout(draftSaveTimer);
+          draftSaveTimer = null;
+          persistDraftNow();
+          return;
+        }
+        if (draftSaveTimer) clearTimeout(draftSaveTimer);
+        draftSaveTimer = setTimeout(() => {
+          draftSaveTimer = null;
+          persistDraftNow();
+        }, 220);
+      }
+
+      function scheduleCanvasRender() {
+        if (canvasRenderRaf) return;
+        canvasRenderRaf = window.requestAnimationFrame(() => {
+          canvasRenderRaf = null;
+          renderCanvas();
+        });
       }
 
       function normalizeEdges(rawEdges, nodes) {
@@ -757,12 +781,12 @@
         return (item?.name || "").trim() || actionMeta[item.type]?.name || "Action";
       }
 
-      function setConfig(patch, rerenderConfig = false) {
+      function setConfig(patch, rerenderConfig = false, rerenderCanvas = true) {
         const active = getActive();
         if (!active) return;
         active.config = { ...active.config, ...patch };
         saveDraft();
-        renderCanvas();
+        if (rerenderCanvas) scheduleCanvasRender();
         if (rerenderConfig) renderConfig();
       }
 
@@ -1148,7 +1172,7 @@
         container.querySelector("#common_name").oninput = (e) => {
           active.name = e.target.value;
           saveDraft();
-          renderCanvas();
+          scheduleCanvasRender();
         };
       }
 
@@ -1210,7 +1234,7 @@
             el.addEventListener(event, (e) => {
               f[key] = el.type === "checkbox" ? e.target.checked : e.target.value;
               saveDraft();
-              renderCanvas();
+              scheduleCanvasRender();
               if (key === "type") renderConfig();
             });
           });
@@ -1492,7 +1516,7 @@
       document.getElementById("saveFlow").onclick = () => {
         const payload = upsertCurrentFlow();
         localStorage.setItem(PUBLISHED_KEY, JSON.stringify({ ...payload, version: 1, savedAt: payload.updatedAt }));
-        saveDraft();
+        saveDraft(true);
         alert("流程已儲存");
       };
 
