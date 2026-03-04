@@ -165,6 +165,19 @@
         border-color: #b6caee;
       }
 
+      .tab-alert {
+        margin-left: 6px;
+        display: inline-grid;
+        place-items: center;
+        width: 16px;
+        height: 16px;
+        border-radius: 999px;
+        background: #ffd84d;
+        color: #6b4a00;
+        font-size: 11px;
+        font-weight: 900;
+      }
+
       .badge {
         display: inline-block;
         border-radius: 999px;
@@ -173,6 +186,17 @@
         background: #e9fff8;
         color: #0d6a60;
         border: 1px solid #c6efe5;
+      }
+
+      .badge-warn {
+        background: #fff6e6;
+        color: #9a6200;
+        border: 1px solid #f0d6a0;
+      }
+
+      .approval-actions {
+        display: flex;
+        gap: 6px;
       }
 
       table { width: 100%; border-collapse: collapse; }
@@ -233,7 +257,7 @@
 
           <div class="tabs">
             <button class="tab active" data-tab="mine">我建立的 Flow</button>
-            <button class="tab" data-tab="joined">我參與的 Flow</button>
+            <button class="tab" data-tab="joined">我參與的 Flow <span class="tab-alert hidden" id="joinedAlert">!</span></button>
           </div>
 
           <div id="tab-mine" class="panel">
@@ -245,10 +269,30 @@
 
           <div id="tab-joined" class="panel hidden">
             <table>
-              <thead><tr><th>Flow 名稱</th><th>我的角色</th><th>待處理</th></tr></thead>
+              <thead><tr><th>Flow 名稱</th><th>審核節點</th><th>狀態</th><th>操作</th></tr></thead>
               <tbody>
-                <tr><td>採購申請流程</td><td>Approver</td><td>2</td></tr>
-                <tr><td>合約走簽</td><td>Reviewer</td><td>1</td></tr>
+                <tr>
+                  <td>請假申請流程</td>
+                  <td>主管審核</td>
+                  <td><span class="badge badge-warn">待你審核</span></td>
+                  <td>
+                    <div class="approval-actions">
+                      <button class="btn btn-soft" data-demo-approve="A-1001">通過</button>
+                      <button class="btn btn-soft" data-demo-reject="A-1001">退回</button>
+                    </div>
+                  </td>
+                </tr>
+                <tr>
+                  <td>費用報銷流程</td>
+                  <td>財務審核</td>
+                  <td><span class="badge badge-warn">待你審核</span></td>
+                  <td>
+                    <div class="approval-actions">
+                      <button class="btn btn-soft" data-demo-approve="A-1002">通過</button>
+                      <button class="btn btn-soft" data-demo-reject="A-1002">退回</button>
+                    </div>
+                  </td>
+                </tr>
               </tbody>
             </table>
           </div>
@@ -417,6 +461,49 @@
         });
       });
 
+      document.querySelectorAll("[data-demo-approve]").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          const id = btn.getAttribute("data-demo-approve");
+          const row = btn.closest("tr");
+          if (row) {
+            const statusCell = row.querySelector(".badge-warn");
+            if (statusCell) {
+              statusCell.classList.remove("badge-warn");
+              statusCell.classList.add("badge");
+              statusCell.textContent = "已通過";
+            }
+            const actionCell = row.querySelector(".approval-actions");
+            if (actionCell) actionCell.innerHTML = '<span class="muted">已處理</span>';
+          }
+          refreshJoinedAlert();
+          alert(`示意：審核單 ${id} 已通過`);
+        });
+      });
+      document.querySelectorAll("[data-demo-reject]").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          const id = btn.getAttribute("data-demo-reject");
+          const row = btn.closest("tr");
+          if (row) {
+            const statusCell = row.querySelector(".badge-warn");
+            if (statusCell) {
+              statusCell.classList.remove("badge-warn");
+              statusCell.classList.add("badge");
+              statusCell.textContent = "已退回";
+            }
+            const actionCell = row.querySelector(".approval-actions");
+            if (actionCell) actionCell.innerHTML = '<span class="muted">已處理</span>';
+          }
+          refreshJoinedAlert();
+          alert(`示意：審核單 ${id} 已退回`);
+        });
+      });
+
+      function refreshJoinedAlert() {
+        const joinedBody = document.querySelector("#tab-joined tbody");
+        const hasPending = Boolean(joinedBody?.querySelector(".badge-warn"));
+        document.getElementById("joinedAlert").classList.toggle("hidden", !hasPending);
+      }
+
       document.getElementById("newFlowBtn").addEventListener("click", () => {
         window.location.href = "./builder.html";
       });
@@ -425,6 +512,7 @@
 
       switchPage("flow-list");
       renderFlowViews();
+      refreshJoinedAlert();
     </script>
   </body>
 </html>
