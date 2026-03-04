@@ -757,13 +757,13 @@
         return (item?.name || "").trim() || actionMeta[item.type]?.name || "Action";
       }
 
-      function setConfig(patch) {
+      function setConfig(patch, rerenderConfig = false) {
         const active = getActive();
         if (!active) return;
         active.config = { ...active.config, ...patch };
         saveDraft();
         renderCanvas();
-        renderConfig();
+        if (rerenderConfig) renderConfig();
       }
 
       function removeAction(id) {
@@ -1210,7 +1210,8 @@
             el.addEventListener(event, (e) => {
               f[key] = el.type === "checkbox" ? e.target.checked : e.target.value;
               saveDraft();
-              renderConfig();
+              renderCanvas();
+              if (key === "type") renderConfig();
             });
           });
           renderFormFieldDynamic(f, card.querySelector("[data-dynamic]"));
@@ -1282,10 +1283,10 @@
               : row("比較變數", `<select id="c_var">${["form.amount", "form.type", "mail.subject", "agent.score"].map((v) => `<option ${c.compareVar === v ? "selected" : ""}>${v}</option>`).join("")}</select>`)}
           </div>
         `;
-        container.querySelector("#c_form").onchange = (e) => setConfig({ sourceForm: e.target.value, sourceField: "" });
+        container.querySelector("#c_form").onchange = (e) => setConfig({ sourceForm: e.target.value, sourceField: "" }, true);
         container.querySelector("#c_field").onchange = (e) => setConfig({ sourceField: e.target.value });
         container.querySelector("#c_operator").onchange = (e) => setConfig({ operator: e.target.value });
-        container.querySelector("#c_from").onchange = (e) => setConfig({ compareFrom: e.target.value });
+        container.querySelector("#c_from").onchange = (e) => setConfig({ compareFrom: e.target.value }, true);
         if (c.compareFrom === "manual") container.querySelector("#c_val").oninput = (e) => setConfig({ compareValue: e.target.value });
         else container.querySelector("#c_var").onchange = (e) => setConfig({ compareVar: e.target.value });
       }
@@ -1363,7 +1364,7 @@
           </div>
         `;
         container.querySelector("#t_name").oninput = (e) => setConfig({ taskName: e.target.value });
-        container.querySelector("#t_provider").onchange = (e) => setConfig({ provider: e.target.value, providerCfg: {} });
+        container.querySelector("#t_provider").onchange = (e) => setConfig({ provider: e.target.value, providerCfg: {} }, true);
         container.querySelector("#t_type").onchange = (e) => setConfig({ taskType: e.target.value });
         container.querySelector("#t_input").oninput = (e) => setConfig({ input: e.target.value });
         renderProviderExtra(c.provider, c.providerCfg, container.querySelector("#providerExtra"), active);
@@ -1461,7 +1462,7 @@
         container.querySelector("#m_to").oninput = (e) => setConfig({ to: e.target.value });
         container.querySelector("#m_subject").oninput = (e) => setConfig({ subject: e.target.value });
         container.querySelector("#m_query").oninput = (e) => setConfig({ query: e.target.value });
-        container.querySelector("#m_scope").onchange = (e) => setConfig({ scope: e.target.value });
+        container.querySelector("#m_scope").onchange = (e) => setConfig({ scope: e.target.value }, true);
         if (c.scope === "最新 N 封") container.querySelector("#m_n").oninput = (e) => setConfig({ n: Number(e.target.value) || 1 });
         container.querySelector("#m_download").onchange = (e) => setConfig({ download: e.target.checked });
         container.querySelector("#m_read").onchange = (e) => setConfig({ markRead: e.target.checked });
