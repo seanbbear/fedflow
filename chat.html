@@ -47,7 +47,7 @@
       .body { padding: 12px; }
       .field { display: grid; gap: 6px; margin-bottom: 10px; }
       .field label { font-size: 12px; color: #415983; font-weight: 700; }
-      .field select, .field textarea {
+      .field select, .field textarea, .field input {
         width: 100%;
         border: 1px solid var(--line);
         border-radius: 9px;
@@ -100,8 +100,8 @@
             <select id="flowSelect"></select>
           </div>
           <div class="field">
-            <label>輸入訊息</label>
-            <textarea id="userInput" placeholder="輸入一段需求，例如：我要申請三天特休"></textarea>
+            <label>表單輸入</label>
+            <div id="formInputs"></div>
           </div>
           <div class="row">
             <button class="btn btn-primary" id="sendBtn">送出並執行</button>
@@ -158,10 +158,10 @@
         return nodes.find((n) => n.id === out[0].to) || null;
       }
 
-      function runFlow(record, input) {
+      function runFlow(record, formValues) {
         const nodes = Array.isArray(record?.flow) ? record.flow : [];
         const edges = Array.isArray(record?.edges) ? record.edges : [];
-        const context = { form: { user_input: input }, mail: {}, tool: {}, agent: {}, approval: {} };
+        const context = { form: { ...(formValues || {}) }, mail: {}, tool: {}, agent: {}, approval: {} };
         const steps = [];
 
         let curr = getStartNode(nodes, edges);
@@ -177,7 +177,7 @@
             continue;
           }
           if (curr.type === "condition") {
-            const left = String(context.form[cfg.sourceField] ?? context.form.user_input ?? "");
+            const left = String(context.form[cfg.sourceField] ?? "");
             const right = String(cfg.compareFrom === "variable" ? "" : (cfg.compareValue ?? ""));
             const op = cfg.operator || "=";
             let pass = false;
@@ -191,7 +191,7 @@
             continue;
           }
           if (curr.type === "approval") {
-            const approved = !/reject|駁回|不通過|退回/i.test(input);
+            const approved = true;
             context.approval[curr.id] = approved ? "approve" : "reject";
             steps.push(`審核: ${name} -> ${approved ? "通過" : "退回"}`);
             curr = nextNode(curr, nodes, edges, approved);
@@ -210,7 +210,7 @@
             continue;
           }
           if (curr.type === "mailReader") {
-            context.mail.subject = input;
+            context.mail.subject = context.form["主旨"] || "";
             steps.push(`讀取信件: ${name} -> 完成`);
             curr = nextNode(curr, nodes, edges, true);
             continue;
@@ -253,19 +253,93 @@
         if (curr) {
           select.value = curr.id;
           document.getElementById("flowMeta").textContent = `目前流程：${curr.name || "未命名流程"}`;
+          renderFormInputs(curr);
         }
+      }
+
+      function getMainFormNode(record) {
+        const nodes = Array.isArray(record?.flow) ? record.flow : [];
+        return nodes.find((n) => n.type === "form") || null;
+      }
+
+      function parseSelectOptions(raw) {
+        return String(raw || "")
+          .split(",")
+          .map((x) => x.trim())
+          .filter(Boolean)
+          .map((opt) => {
+            const parts = opt.split(":");
+            return { label: parts[0] || opt, value: parts[1] || parts[0] || opt };
+          });
+      }
+
+      function renderFormInputs(record) {
+        const mount = document.getElementById("formInputs");
+        const formNode = getMainFormNode(record);
+        if (!formNode) {
+          mount.innerHTML = '<div class="empty">此流程沒有 Form 節點，將以空輸入執行。</div>';
+          return;
+        }
+        const fields = Array.isArray(formNode?.config?.fields) ? formNode.config.fields : [];
+        if (!fields.length) {
+          mount.innerHTML = '<div class="empty">此 Form 尚未設定欄位。</div>';
+          return;
+        }
+        mount.innerHTML = fields
+          .map((f, idx) => {
+            const key = f.label || `field_${idx + 1}`;
+            const req = f.required ? " *" : "";
+            if (f.type === "select") {
+              const options = parseSelectOptions(f.options);
+              return `
+                <div class="field">
+                  <label>${key}${req}</label>
+                  <select data-form-key="${key}">
+                    ${options.map((o) => `<option value="${o.value}">${o.label}</option>`).join("")}
+                  </select>
+                </div>
+              `;
+            }
+            if (f.type === "checkbox") {
+              return `
+                <div class="field">
+                  <label><input data-form-key="${key}" type="checkbox" ${f.defaultChecked ? "checked" : ""}/> ${key}${req}</label>
+                </div>
+              `;
+            }
+            const inputType = f.type === "number" ? "number" : f.type === "date" ? "date" : f.type === "password" ? "password" : "text";
+            const defaultVal = f.type === "number" ? (f.defaultNumber ?? "") : (f.defaultText || "");
+            return `
+              <div class="field">
+                <label>${key}${req}</label>
+                <input data-form-key="${key}" type="${inputType}" value="${defaultVal}" />
+              </div>
+            `;
+          })
+          .join("");
+      }
+
+      function collectFormInputValues() {
+        const values = {};
+        const nodes = document.querySelectorAll("[data-form-key]");
+        nodes.forEach((el) => {
+          const key = el.getAttribute("data-form-key");
+          values[key] = el.type === "checkbox" ? el.checked : el.value;
+        });
+        return values;
       }
 
       function runCurrentInput() {
         const select = document.getElementById("flowSelect");
-        const input = (document.getElementById("userInput").value || "").trim();
-        if (!input) return;
         const record = flows.find((f) => f.id === select.value);
         if (!record) return;
-        pushMsg("user", input);
-        const result = runFlow(record, input);
+        const formValues = collectFormInputValues();
+        const preview = Object.entries(formValues).length
+          ? Object.entries(formValues).map(([k, v]) => `${k}: ${String(v)}`).join("\n")
+          : "(此流程目前沒有可填欄位)";
+        pushMsg("user", `表單送出：\n${preview}`);
+        const result = runFlow(record, formValues);
         pushMsg("bot", `${result.summary}\n\n${result.steps.map((s, i) => `${i + 1}. ${s}`).join("\n")}`);
-        document.getElementById("userInput").value = "";
       }
 
       document.getElementById("goHome").onclick = () => (window.location.href = "./index.html");
@@ -276,6 +350,7 @@
       document.getElementById("flowSelect").addEventListener("change", (e) => {
         const curr = flows.find((f) => f.id === e.target.value);
         document.getElementById("flowMeta").textContent = curr ? `目前流程：${curr.name || "未命名流程"}` : "尚未選擇流程";
+        if (curr) renderFormInputs(curr);
       });
 
       const params = new URLSearchParams(window.location.search);
