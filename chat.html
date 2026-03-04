@@ -1,0 +1,286 @@
+<!doctype html>
+<html lang="zh-Hant">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>FedFlow Chat Runner</title>
+    <style>
+      :root {
+        --bg: #f3f6fb;
+        --panel: #fff;
+        --line: #d7dfef;
+        --text: #132542;
+        --muted: #62739a;
+        --brand: #0f6f66;
+      }
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        font-family: "Noto Sans TC", "IBM Plex Sans", sans-serif;
+        color: var(--text);
+        background: var(--bg);
+      }
+      .app {
+        min-height: 100vh;
+        display: grid;
+        grid-template-columns: 320px 1fr;
+        gap: 12px;
+        padding: 12px;
+      }
+      .panel {
+        background: var(--panel);
+        border: 1px solid var(--line);
+        border-radius: 14px;
+      }
+      .head {
+        padding: 12px 14px;
+        border-bottom: 1px solid var(--line);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 8px;
+      }
+      h1, h2 { margin: 0; }
+      h1 { font-size: 18px; }
+      h2 { font-size: 15px; }
+      .muted { color: var(--muted); font-size: 12px; }
+      .body { padding: 12px; }
+      .field { display: grid; gap: 6px; margin-bottom: 10px; }
+      .field label { font-size: 12px; color: #415983; font-weight: 700; }
+      .field select, .field textarea {
+        width: 100%;
+        border: 1px solid var(--line);
+        border-radius: 9px;
+        padding: 9px 10px;
+        font-size: 14px;
+        background: #fff;
+      }
+      .field textarea { min-height: 78px; resize: vertical; }
+      .btn {
+        border: 0;
+        border-radius: 10px;
+        padding: 8px 12px;
+        font-weight: 700;
+        cursor: pointer;
+      }
+      .btn-primary { background: var(--brand); color: #fff; }
+      .btn-soft { background: #e8f0ff; color: #2d5490; }
+      .chat {
+        height: calc(100vh - 130px);
+        overflow: auto;
+        padding: 14px;
+        display: grid;
+        gap: 10px;
+      }
+      .msg {
+        max-width: 80%;
+        padding: 10px 12px;
+        border-radius: 12px;
+        white-space: pre-wrap;
+        line-height: 1.45;
+        font-size: 14px;
+      }
+      .msg.user { margin-left: auto; background: #e6f6f2; border: 1px solid #c5ebe2; }
+      .msg.bot { background: #f3f6fd; border: 1px solid #dde5f7; }
+      .row { display: flex; gap: 8px; }
+      .empty { color: var(--muted); font-size: 13px; }
+      @media (max-width: 980px) { .app { grid-template-columns: 1fr; } .chat { height: 420px; } }
+    </style>
+  </head>
+  <body>
+    <main class="app">
+      <aside class="panel">
+        <div class="head">
+          <h2>Flow 對話執行</h2>
+          <button class="btn btn-soft" id="goHome">回首頁</button>
+        </div>
+        <div class="body">
+          <div class="field">
+            <label>選擇 Flow</label>
+            <select id="flowSelect"></select>
+          </div>
+          <div class="field">
+            <label>輸入訊息</label>
+            <textarea id="userInput" placeholder="輸入一段需求，例如：我要申請三天特休"></textarea>
+          </div>
+          <div class="row">
+            <button class="btn btn-primary" id="sendBtn">送出並執行</button>
+            <button class="btn btn-soft" id="clearBtn">清空對話</button>
+          </div>
+          <p class="muted" style="margin-top:10px;">此頁為模擬執行：會依流程節點路徑自動跑完，並回傳執行軌跡。</p>
+        </div>
+      </aside>
+
+      <section class="panel">
+        <div class="head">
+          <div>
+            <h1>Conversation</h1>
+            <div class="muted" id="flowMeta">尚未選擇流程</div>
+          </div>
+        </div>
+        <div class="chat" id="chat"></div>
+      </section>
+    </main>
+
+    <script>
+      const FLOWS_KEY = "fedflow:flows";
+      let flows = [];
+
+      function getFlows() {
+        try {
+          const parsed = JSON.parse(localStorage.getItem(FLOWS_KEY) || "[]");
+          return Array.isArray(parsed) ? parsed : [];
+        } catch (err) {
+          return [];
+        }
+      }
+
+      function getOutEdges(edges, id) {
+        return (edges || []).filter((e) => e.from === id);
+      }
+
+      function getStartNode(flow, edges) {
+        const hasIn = new Set((edges || []).map((e) => e.to));
+        return (flow || []).find((n) => !hasIn.has(n.id)) || (flow || [])[0] || null;
+      }
+
+      function nextNode(curr, nodes, edges, branch) {
+        const out = getOutEdges(edges, curr.id);
+        if (!out.length) return null;
+        if (curr.type === "condition") {
+          const target = out.find((e) => (e.branch || "default") === (branch ? "true" : "false"));
+          if (target) return nodes.find((n) => n.id === target.to) || null;
+        }
+        if (curr.type === "approval") {
+          const target = out.find((e) => (e.branch || "default") === (branch ? "approve" : "reject"));
+          if (target) return nodes.find((n) => n.id === target.to) || null;
+        }
+        return nodes.find((n) => n.id === out[0].to) || null;
+      }
+
+      function runFlow(record, input) {
+        const nodes = Array.isArray(record?.flow) ? record.flow : [];
+        const edges = Array.isArray(record?.edges) ? record.edges : [];
+        const context = { form: { user_input: input }, mail: {}, tool: {}, agent: {}, approval: {} };
+        const steps = [];
+
+        let curr = getStartNode(nodes, edges);
+        let guard = 0;
+        while (curr && guard < 50) {
+          guard += 1;
+          const name = curr.name || curr.type;
+          const cfg = curr.config || {};
+
+          if (curr.type === "form") {
+            steps.push(`表單: ${name} -> 已收集輸入`);
+            curr = nextNode(curr, nodes, edges, true);
+            continue;
+          }
+          if (curr.type === "condition") {
+            const left = String(context.form[cfg.sourceField] ?? context.form.user_input ?? "");
+            const right = String(cfg.compareFrom === "variable" ? "" : (cfg.compareValue ?? ""));
+            const op = cfg.operator || "=";
+            let pass = false;
+            if (op === "=") pass = left === right;
+            if (op === "≠") pass = left !== right;
+            if (op === ">") pass = Number(left) > Number(right);
+            if (op === "<") pass = Number(left) < Number(right);
+            if (op === "包含") pass = left.includes(right);
+            steps.push(`判斷: ${name} -> ${pass ? "符合" : "不符合"}`);
+            curr = nextNode(curr, nodes, edges, pass);
+            continue;
+          }
+          if (curr.type === "approval") {
+            const approved = !/reject|駁回|不通過|退回/i.test(input);
+            context.approval[curr.id] = approved ? "approve" : "reject";
+            steps.push(`審核: ${name} -> ${approved ? "通過" : "退回"}`);
+            curr = nextNode(curr, nodes, edges, approved);
+            continue;
+          }
+          if (curr.type === "agent") {
+            context.agent[curr.id] = { result: "done" };
+            steps.push(`AI 助手: ${name} -> 完成`);
+            curr = nextNode(curr, nodes, edges, true);
+            continue;
+          }
+          if (curr.type === "tool") {
+            context.tool[curr.id] = { result: "done" };
+            steps.push(`使用工具: ${name} -> 完成`);
+            curr = nextNode(curr, nodes, edges, true);
+            continue;
+          }
+          if (curr.type === "mailReader") {
+            context.mail.subject = input;
+            steps.push(`讀取信件: ${name} -> 完成`);
+            curr = nextNode(curr, nodes, edges, true);
+            continue;
+          }
+          if (curr.type === "sendAsUser") {
+            steps.push(`寄信: ${name} -> 已送出(模擬)`);
+            curr = nextNode(curr, nodes, edges, true);
+            continue;
+          }
+          steps.push(`節點: ${name} -> 略過`);
+          curr = nextNode(curr, nodes, edges, true);
+        }
+
+        return {
+          steps,
+          summary: steps.length ? `流程執行完成，共 ${steps.length} 個節點。` : "流程沒有可執行節點。"
+        };
+      }
+
+      function pushMsg(role, text) {
+        const chat = document.getElementById("chat");
+        const el = document.createElement("div");
+        el.className = `msg ${role}`;
+        el.textContent = text;
+        chat.appendChild(el);
+        chat.scrollTop = chat.scrollHeight;
+      }
+
+      function renderFlowOptions(preferId) {
+        const select = document.getElementById("flowSelect");
+        flows = getFlows();
+        if (!flows.length) {
+          select.innerHTML = `<option value="">尚無流程</option>`;
+          document.getElementById("flowMeta").textContent = "尚無可執行流程，請先到 Builder 儲存流程";
+          return;
+        }
+        select.innerHTML = flows.map((f) => `<option value="${f.id}">${f.name || "未命名流程"}</option>`).join("");
+        if (preferId && flows.some((f) => f.id === preferId)) select.value = preferId;
+        const curr = flows.find((f) => f.id === select.value) || flows[0];
+        if (curr) {
+          select.value = curr.id;
+          document.getElementById("flowMeta").textContent = `目前流程：${curr.name || "未命名流程"}`;
+        }
+      }
+
+      function runCurrentInput() {
+        const select = document.getElementById("flowSelect");
+        const input = (document.getElementById("userInput").value || "").trim();
+        if (!input) return;
+        const record = flows.find((f) => f.id === select.value);
+        if (!record) return;
+        pushMsg("user", input);
+        const result = runFlow(record, input);
+        pushMsg("bot", `${result.summary}\n\n${result.steps.map((s, i) => `${i + 1}. ${s}`).join("\n")}`);
+        document.getElementById("userInput").value = "";
+      }
+
+      document.getElementById("goHome").onclick = () => (window.location.href = "./index.html");
+      document.getElementById("clearBtn").onclick = () => {
+        document.getElementById("chat").innerHTML = '<div class="empty">對話已清空。</div>';
+      };
+      document.getElementById("sendBtn").onclick = runCurrentInput;
+      document.getElementById("flowSelect").addEventListener("change", (e) => {
+        const curr = flows.find((f) => f.id === e.target.value);
+        document.getElementById("flowMeta").textContent = curr ? `目前流程：${curr.name || "未命名流程"}` : "尚未選擇流程";
+      });
+
+      const params = new URLSearchParams(window.location.search);
+      renderFlowOptions(params.get("id"));
+      document.getElementById("chat").innerHTML = '<div class="empty">輸入訊息後，將直接觸發所選 Flow 執行。</div>';
+    </script>
+  </body>
+</html>

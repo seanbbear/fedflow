@@ -1,0 +1,430 @@
+<!doctype html>
+<html lang="zh-Hant">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>FedFlow Console</title>
+    <style>
+      :root {
+        --blue-900: #14386d;
+        --blue-800: #1a4a90;
+        --bg: #f4f7fc;
+        --panel: #ffffff;
+        --line: #d6deef;
+        --text: #12233f;
+        --muted: #5f7092;
+        --ok: #0f6f66;
+      }
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        font-family: "Noto Sans TC", "IBM Plex Sans", sans-serif;
+        color: var(--text);
+        background: var(--bg);
+      }
+      .app {
+        min-height: 100vh;
+        display: grid;
+        grid-template-columns: 250px 1fr;
+      }
+      .sidebar {
+        background: linear-gradient(180deg, var(--blue-800), var(--blue-900));
+        color: #eaf2ff;
+        padding: 16px 12px;
+      }
+      .brand {
+        font-weight: 800;
+        letter-spacing: 0.3px;
+        margin: 0 8px 14px;
+      }
+      .nav-btn {
+        width: 100%;
+        border: 0;
+        text-align: left;
+        background: transparent;
+        color: inherit;
+        border-radius: 10px;
+        padding: 10px 12px;
+        margin-bottom: 6px;
+        cursor: pointer;
+        font-weight: 700;
+      }
+      .nav-btn.active { background: rgba(255, 255, 255, 0.16); }
+
+      .main { padding: 16px; overflow: auto; }
+      .head {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 12px;
+      }
+      .head h1 { margin: 0; font-size: 22px; }
+      .muted { color: var(--muted); font-size: 13px; }
+
+      .btn {
+        border: 0;
+        border-radius: 10px;
+        padding: 9px 12px;
+        font-weight: 700;
+        cursor: pointer;
+      }
+      .btn-primary { background: var(--ok); color: #fff; }
+      .btn-soft { background: #e9f0ff; color: #27508f; }
+
+      .panel {
+        background: var(--panel);
+        border: 1px solid var(--line);
+        border-radius: 14px;
+        padding: 14px;
+      }
+      .hidden { display: none !important; }
+
+      .toolbar {
+        display: flex;
+        justify-content: space-between;
+        gap: 10px;
+        align-items: center;
+        margin-bottom: 12px;
+      }
+      .search-wrap {
+        display: flex;
+        width: 520px;
+        max-width: 100%;
+        border: 1px solid #cfd7e5;
+        border-radius: 999px;
+        overflow: hidden;
+        background: #fff;
+      }
+      .search-wrap select,
+      .search-wrap input {
+        border: 0;
+        padding: 9px 12px;
+        font-size: 13px;
+        color: #586e8f;
+      }
+      .search-wrap select { width: 160px; border-right: 1px solid #e2e7f0; }
+      .search-wrap input { flex: 1; outline: none; }
+
+      .toolbar-right { display: flex; align-items: center; gap: 8px; color: #6f82a0; }
+      .sort-select {
+        border: 0;
+        background: transparent;
+        color: #495f80;
+        font-weight: 600;
+      }
+
+      .flow-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+      }
+      .flow-card {
+        border: 1px solid #dce4f2;
+        background: #eef2f7;
+        border-radius: 16px;
+        padding: 14px;
+        cursor: pointer;
+      }
+      .flow-card:hover { border-color: #b7c8ea; }
+      .flow-card-top { display: flex; justify-content: space-between; align-items: start; gap: 8px; }
+      .flow-name {
+        border: 0;
+        padding: 0;
+        background: transparent;
+        color: #304a72;
+        font-size: 18px;
+        font-weight: 800;
+        text-align: left;
+        cursor: pointer;
+      }
+      .flow-name:hover { text-decoration: underline; }
+      .dots { color: #5c7294; font-weight: 700; }
+      .flow-desc { margin-top: 8px; color: #5f7492; font-size: 13px; min-height: 36px; }
+      .flow-meta { margin-top: 8px; color: #6e82a0; font-size: 12px; display: grid; gap: 3px; }
+      .flow-hr { margin: 12px 0 8px; border-top: 1px solid #d4deec; }
+      .flow-foot { display: flex; justify-content: space-between; align-items: center; color: #6b7e9b; font-size: 12px; }
+      .state { display: inline-flex; align-items: center; gap: 6px; }
+      .dot { width: 10px; height: 10px; border-radius: 999px; background: #9fb1c7; }
+      .dot.ok { background: #4ba915; }
+
+      .inline-actions { margin-top: 10px; display: flex; gap: 8px; }
+
+      .tabs { display: flex; gap: 8px; margin-bottom: 12px; }
+      .tab {
+        border: 1px solid var(--line);
+        background: #fff;
+        border-radius: 999px;
+        padding: 7px 12px;
+        cursor: pointer;
+        font-weight: 700;
+        color: #3d5889;
+      }
+      .tab.active {
+        background: #e8f1ff;
+        border-color: #b6caee;
+      }
+
+      .badge {
+        display: inline-block;
+        border-radius: 999px;
+        padding: 3px 8px;
+        font-size: 12px;
+        background: #e9fff8;
+        color: #0d6a60;
+        border: 1px solid #c6efe5;
+      }
+
+      table { width: 100%; border-collapse: collapse; }
+      th, td { text-align: left; padding: 10px; border-bottom: 1px solid #e4eaf8; font-size: 14px; }
+      th { color: #49608b; font-weight: 700; }
+
+      @media (max-width: 980px) {
+        .app { grid-template-columns: 1fr; }
+        .flow-grid { grid-template-columns: 1fr; }
+      }
+    </style>
+  </head>
+  <body>
+    <main class="app">
+      <aside class="sidebar">
+        <h2 class="brand">FedFlow Console</h2>
+        <button class="nav-btn active" data-page="flow-list">Flow 列表</button>
+        <button class="nav-btn" data-page="integration">權限整合</button>
+        <button class="nav-btn" data-page="interaction">我的 Flow</button>
+      </aside>
+
+      <section class="main">
+        <section id="page-flow-list">
+          <div class="head">
+            <div>
+              <h1>Flow 列表</h1>
+              <div class="muted">管理所有 Flow，並可進入 Canvas 建立新流程。</div>
+            </div>
+            <button class="btn btn-primary" id="newFlowBtn">＋ 新增</button>
+          </div>
+
+          <div class="toolbar">
+            <div class="search-wrap">
+              <select id="searchBy"><option value="name">搜尋關鍵字</option></select>
+              <input id="searchInput" placeholder="搜尋名稱" />
+            </div>
+            <div class="toolbar-right">
+              <span>排序：</span>
+              <select id="sortBy" class="sort-select">
+                <option value="updated_desc">最新更新時間</option>
+                <option value="updated_asc">最舊更新時間</option>
+                <option value="name_asc">名稱 A-Z</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="flow-grid" id="flowGrid"></div>
+        </section>
+
+        <section id="page-interaction" class="hidden">
+          <div class="head">
+            <div>
+              <h1>我的 Flow</h1>
+              <div class="muted">查看我建立或我參與的 Flow。</div>
+            </div>
+            <button class="btn btn-soft" onclick="window.location.href='./chat.html'">前往對話執行</button>
+          </div>
+
+          <div class="tabs">
+            <button class="tab active" data-tab="mine">我建立的 Flow</button>
+            <button class="tab" data-tab="joined">我參與的 Flow</button>
+          </div>
+
+          <div id="tab-mine" class="panel">
+            <table>
+              <thead><tr><th>Flow 名稱</th><th>最近更新</th><th>狀態</th></tr></thead>
+              <tbody id="mineFlowBody"></tbody>
+            </table>
+          </div>
+
+          <div id="tab-joined" class="panel hidden">
+            <table>
+              <thead><tr><th>Flow 名稱</th><th>我的角色</th><th>待處理</th></tr></thead>
+              <tbody>
+                <tr><td>採購申請流程</td><td>Approver</td><td>2</td></tr>
+                <tr><td>合約走簽</td><td>Reviewer</td><td>1</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <section id="page-integration" class="hidden">
+          <div class="head">
+            <div>
+              <h1>權限整合</h1>
+              <div class="muted">管理工具連接與角色權限（Provider / OAuth / Scope）。</div>
+            </div>
+            <button class="btn btn-primary">儲存權限設定</button>
+          </div>
+
+          <div class="panel">
+            <p class="muted" style="margin:0;">此頁先保留基本設定入口。</p>
+          </div>
+        </section>
+      </section>
+    </main>
+
+    <script>
+      const FLOWS_KEY = "fedflow:flows";
+
+      function getAllFlows() {
+        try {
+          const parsed = JSON.parse(localStorage.getItem(FLOWS_KEY) || "[]");
+          return Array.isArray(parsed) ? parsed : [];
+        } catch (err) {
+          return [];
+        }
+      }
+
+      function saveAllFlows(flows) {
+        localStorage.setItem(FLOWS_KEY, JSON.stringify(flows));
+      }
+
+      function fmtDateTime(iso) {
+        if (!iso) return "-";
+        try {
+          return new Date(iso).toLocaleString();
+        } catch (err) {
+          return String(iso);
+        }
+      }
+
+      function openBuilder(id) {
+        window.location.href = `./builder.html?id=${encodeURIComponent(id)}`;
+      }
+
+      function openChat(id) {
+        window.location.href = `./chat.html?id=${encodeURIComponent(id)}`;
+      }
+
+      function editFlowName(id) {
+        const flows = getAllFlows();
+        const target = flows.find((x) => x.id === id);
+        if (!target) return;
+        const next = window.prompt("修改流程名稱", target.name || "未命名流程");
+        if (next == null) return;
+        target.name = String(next).trim() || "未命名流程";
+        target.updatedAt = new Date().toISOString();
+        saveAllFlows(flows);
+        renderFlowViews();
+      }
+
+      function snippet(flow) {
+        const first = (flow || [])[0];
+        if (!first) return "尚未加入節點";
+        return first.name || first.type || "未命名節點";
+      }
+
+      function renderFlowViews() {
+        const q = (document.getElementById("searchInput").value || "").trim().toLowerCase();
+        const sortBy = document.getElementById("sortBy").value;
+        const grid = document.getElementById("flowGrid");
+        const mineBody = document.getElementById("mineFlowBody");
+
+        let flows = getAllFlows();
+        if (q) {
+          flows = flows.filter((f) => `${f.name || ""} ${snippet(f.flow)}`.toLowerCase().includes(q));
+        }
+        flows.sort((a, b) => {
+          if (sortBy === "updated_asc") return String(a.updatedAt || "").localeCompare(String(b.updatedAt || ""));
+          if (sortBy === "name_asc") return String(a.name || "").localeCompare(String(b.name || ""));
+          return String(b.updatedAt || "").localeCompare(String(a.updatedAt || ""));
+        });
+
+        if (!flows.length) {
+          grid.innerHTML = `<div class="panel" style="grid-column:1/-1;"><p class="muted" style="margin:0;">尚無已儲存流程，請先新增並儲存。</p></div>`;
+          mineBody.innerHTML = `<tr><td colspan="3" class="muted">尚無我建立的流程。</td></tr>`;
+          return;
+        }
+
+        grid.innerHTML = flows.map((f) => `
+          <article class="flow-card" data-open="${f.id}">
+            <div class="flow-card-top">
+              <button class="flow-name" data-edit="${f.id}">${f.name || "未命名流程"}</button>
+              <span class="dots">•••</span>
+            </div>
+            <div class="flow-desc">${snippet(f.flow)}</div>
+            <div class="flow-meta">
+              <div>更新時間：${fmtDateTime(f.updatedAt)}</div>
+              <div>建立者：me</div>
+            </div>
+            <div class="flow-hr"></div>
+            <div class="flow-foot">
+              <span>🔑 ${fmtDateTime(f.createdAt)} 建立</span>
+              <span class="state">公開到對話頁 <span class="dot ok"></span></span>
+            </div>
+            <div class="inline-actions">
+              <button class="btn btn-soft" data-open-btn="${f.id}">開啟 Canvas</button>
+              <button class="btn btn-soft" data-chat="${f.id}">對話執行</button>
+            </div>
+          </article>
+        `).join("");
+
+        mineBody.innerHTML = flows.map((f) => `
+          <tr>
+            <td><button class="flow-name" data-edit="${f.id}" style="font-size:14px;">${f.name || "未命名流程"}</button></td>
+            <td>${fmtDateTime(f.updatedAt)}</td>
+            <td><span class="badge">Active</span></td>
+          </tr>
+        `).join("");
+
+        document.querySelectorAll("[data-open]").forEach((el) => {
+          el.addEventListener("click", (e) => {
+            if (e.target.closest("[data-edit]") || e.target.closest("button")) return;
+            openBuilder(el.getAttribute("data-open"));
+          });
+        });
+        document.querySelectorAll("[data-open-btn]").forEach((el) => {
+          el.addEventListener("click", () => openBuilder(el.getAttribute("data-open-btn")));
+        });
+        document.querySelectorAll("[data-chat]").forEach((el) => {
+          el.addEventListener("click", () => openChat(el.getAttribute("data-chat")));
+        });
+        document.querySelectorAll("[data-edit]").forEach((el) => {
+          el.addEventListener("click", (e) => {
+            e.stopPropagation();
+            editFlowName(el.getAttribute("data-edit"));
+          });
+        });
+      }
+
+      function switchPage(page) {
+        ["flow-list", "interaction", "integration"].forEach((p) => {
+          document.getElementById(`page-${p}`).classList.toggle("hidden", p !== page);
+        });
+        document.querySelectorAll(".nav-btn").forEach((btn) => {
+          btn.classList.toggle("active", btn.getAttribute("data-page") === page);
+        });
+      }
+
+      document.querySelectorAll(".nav-btn").forEach((btn) => {
+        btn.addEventListener("click", () => switchPage(btn.getAttribute("data-page")));
+      });
+
+      const tabs = document.querySelectorAll(".tab");
+      tabs.forEach((tab) => {
+        tab.addEventListener("click", () => {
+          const target = tab.getAttribute("data-tab");
+          document.getElementById("tab-mine").classList.toggle("hidden", target !== "mine");
+          document.getElementById("tab-joined").classList.toggle("hidden", target !== "joined");
+          tabs.forEach((t) => t.classList.toggle("active", t === tab));
+        });
+      });
+
+      document.getElementById("newFlowBtn").addEventListener("click", () => {
+        window.location.href = "./builder.html";
+      });
+      document.getElementById("searchInput").addEventListener("input", renderFlowViews);
+      document.getElementById("sortBy").addEventListener("change", renderFlowViews);
+
+      switchPage("flow-list");
+      renderFlowViews();
+    </script>
+  </body>
+</html>

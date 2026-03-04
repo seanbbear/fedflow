@@ -1,0 +1,418 @@
+<!doctype html>
+<html lang="zh-Hant">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>FedFlow Runner</title>
+    <style>
+      :root {
+        --bg: #f2f5fb;
+        --panel: #ffffff;
+        --line: #d8def0;
+        --ink: #10213d;
+        --muted: #5f708f;
+        --brand: #0f6f66;
+        --radius: 14px;
+      }
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        font-family: "Noto Sans TC", "IBM Plex Sans", sans-serif;
+        color: var(--ink);
+        background: radial-gradient(circle at 10% 5%, #dff2ef, transparent 28%), var(--bg);
+      }
+      .app {
+        min-height: 100vh;
+        display: grid;
+        grid-template-columns: minmax(320px, 1fr) 320px;
+        gap: 14px;
+        padding: 14px;
+      }
+      .panel {
+        background: var(--panel);
+        border: 1px solid var(--line);
+        border-radius: var(--radius);
+        overflow: auto;
+      }
+      .head {
+        padding: 14px 16px;
+        border-bottom: 1px solid var(--line);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+      }
+      h1, h2 { margin: 0; }
+      h1 { font-size: 18px; }
+      h2 { font-size: 16px; }
+      .muted { color: var(--muted); font-size: 12px; }
+      .btn {
+        border: 0;
+        border-radius: 10px;
+        padding: 8px 12px;
+        font-weight: 700;
+        cursor: pointer;
+      }
+      .btn-primary { background: var(--brand); color: #fff; }
+      .btn-soft { background: #e8efff; color: #324f86; }
+      .content { padding: 16px; }
+      .step {
+        border: 1px solid var(--line);
+        border-radius: 12px;
+        padding: 14px;
+      }
+      .step-title { font-size: 18px; font-weight: 800; }
+      .step-sub { color: var(--muted); margin-top: 6px; font-size: 13px; }
+      .fields { margin-top: 14px; display: grid; gap: 10px; }
+      .field label { display: block; font-size: 12px; margin-bottom: 6px; color: #425a84; font-weight: 700; }
+      .field input, .field select, .field textarea {
+        width: 100%; border: 1px solid var(--line); border-radius: 8px; padding: 8px 10px; font-size: 14px;
+      }
+      .field textarea { min-height: 90px; resize: vertical; }
+      .actions { margin-top: 12px; display: flex; gap: 8px; }
+      .result { margin-top: 12px; padding: 10px; border: 1px dashed #9fb0d8; border-radius: 10px; background: #f7faff; }
+      .log-list { padding: 12px 16px 16px; display: grid; gap: 10px; }
+      .log-item { border: 1px solid var(--line); border-radius: 10px; padding: 10px; font-size: 13px; }
+      .empty { color: var(--muted); padding: 22px; text-align: center; }
+      @media (max-width: 980px) { .app { grid-template-columns: 1fr; } }
+    </style>
+  </head>
+  <body>
+    <main class="app">
+      <section class="panel">
+        <div class="head">
+          <div>
+            <h1>Flow 使用頁</h1>
+            <div class="muted" id="meta">尚未載入發佈版本</div>
+          </div>
+          <div style="display:flex; gap:8px;">
+            <button class="btn btn-soft" id="toBuilder">回 Builder</button>
+            <button class="btn btn-primary" id="restart">重新開始</button>
+          </div>
+        </div>
+        <div class="content" id="runner"></div>
+      </section>
+
+      <aside class="panel">
+        <div class="head">
+          <h2>執行紀錄</h2>
+        </div>
+        <div class="log-list" id="logs"></div>
+      </aside>
+    </main>
+
+    <script>
+      const PUBLISHED_KEY = "fedflow:builder:published";
+      const actionMeta = {
+        form: { name: "表單", desc: "填寫資料" },
+        condition: { name: "判斷", desc: "自動分流" },
+        approval: { name: "審核", desc: "人工核准" },
+        sendAsUser: { name: "使用者寄信", desc: "寄送郵件" },
+        agent: { name: "Agent", desc: "AI 任務" },
+        tool: { name: "使用工具", desc: "Provider 任務" },
+        mailReader: { name: "讀取信件", desc: "信件擷取" }
+      };
+
+      let flow = [];
+      let edges = [];
+      let currentNode = null;
+      let context = { form: {}, mail: {}, agent: {}, tool: {}, approval: {} };
+      let logs = [];
+
+      function escapeHtml(str) {
+        return String(str || "")
+          .replaceAll("&", "&amp;")
+          .replaceAll("<", "&lt;")
+          .replaceAll(">", "&gt;")
+          .replaceAll('"', "&quot;");
+      }
+
+      function loadPublished() {
+        const raw = localStorage.getItem(PUBLISHED_KEY);
+        if (!raw) return false;
+        try {
+          const data = JSON.parse(raw);
+          flow = Array.isArray(data.flow) ? data.flow : [];
+          edges = Array.isArray(data.edges) ? data.edges : [];
+          document.getElementById("meta").textContent = `已載入版本：${data.publishedAt || "未標記時間"} / ${flow.length} actions`;
+          return flow.length > 0;
+        } catch (err) {
+          return false;
+        }
+      }
+
+      function getStartNode() {
+        const hasIn = new Set(edges.map((e) => e.to));
+        return flow.find((n) => !hasIn.has(n.id)) || flow[0] || null;
+      }
+
+      function getOutEdges(id) {
+        return edges.filter((e) => e.from === id);
+      }
+
+      function log(msg) {
+        logs.unshift({ at: new Date().toLocaleTimeString(), msg });
+        renderLogs();
+      }
+
+      function renderLogs() {
+        const mount = document.getElementById("logs");
+        if (!logs.length) {
+          mount.innerHTML = '<div class="empty">尚無執行紀錄</div>';
+          return;
+        }
+        mount.innerHTML = logs.map((x) => `<div class="log-item"><div class="muted">${x.at}</div>${escapeHtml(x.msg)}</div>`).join("");
+      }
+
+      function nextByGraph(node, branch) {
+        const outEdges = getOutEdges(node.id);
+        if (!outEdges.length) {
+          const idx = flow.findIndex((x) => x.id === node.id);
+          return flow[idx + 1] || null;
+        }
+        if (node.type === "condition") {
+          const target = outEdges.find((e) => (e.branch || "default") === (branch ? "true" : "false"));
+          if (target) return flow.find((n) => n.id === target.to) || null;
+        }
+        if (node.type === "approval") {
+          const target = outEdges.find((e) => (e.branch || "default") === (branch ? "approve" : "reject"));
+          if (target) return flow.find((n) => n.id === target.to) || null;
+        }
+        return flow.find((n) => n.id === outEdges[0].to) || null;
+      }
+
+      function renderNoFlow() {
+        document.getElementById("runner").innerHTML = `
+          <div class="empty">
+            尚未有可執行的 Flow。請先到 Builder 發佈流程。
+            <div style="margin-top:10px;"><button class="btn btn-primary" id="goBuild">前往 Builder</button></div>
+          </div>
+        `;
+        document.getElementById("goBuild").onclick = () => (window.location.href = "./builder.html");
+      }
+
+      function renderNode() {
+        const runner = document.getElementById("runner");
+        if (!currentNode) {
+          runner.innerHTML = `
+            <div class="step">
+              <div class="step-title">流程完成</div>
+              <div class="step-sub">所有可執行節點已完成。</div>
+              <div class="result">輸出摘要：${escapeHtml(JSON.stringify(context, null, 2))}</div>
+            </div>
+          `;
+          return;
+        }
+
+        const meta = actionMeta[currentNode.type] || { name: currentNode.type, desc: "" };
+        runner.innerHTML = `
+          <div class="step">
+            <div class="step-title">${escapeHtml(meta.name)}</div>
+            <div class="step-sub">${escapeHtml(meta.desc)}</div>
+            <div class="fields" id="fields"></div>
+            <div class="actions" id="actions"></div>
+          </div>
+        `;
+
+        if (currentNode.type === "form") return renderFormStep(currentNode);
+        if (currentNode.type === "condition") return runConditionStep(currentNode);
+        if (currentNode.type === "approval") return renderApprovalStep(currentNode);
+        if (currentNode.type === "sendAsUser") return renderSendStep(currentNode);
+        if (currentNode.type === "agent") return renderAgentStep(currentNode);
+        if (currentNode.type === "tool") return renderToolStep(currentNode);
+        if (currentNode.type === "mailReader") return renderMailStep(currentNode);
+
+        return autoPass("未知 Action，已略過");
+      }
+
+      function renderFormStep(node) {
+        const c = node.config || {};
+        const fields = Array.isArray(c.fields) ? c.fields : [];
+        const mount = document.getElementById("fields");
+        if (!fields.length) {
+          mount.innerHTML = '<div class="muted">此表單尚未定義欄位，直接下一步。</div>';
+        } else {
+          mount.innerHTML = fields
+            .map((f, idx) => {
+              const key = f.label || `field_${idx + 1}`;
+              if (f.type === "checkbox") {
+                return `<div class="field"><label><input data-key="${escapeHtml(key)}" type="checkbox" ${f.defaultChecked ? "checked" : ""}/> ${escapeHtml(f.label || key)}</label></div>`;
+              }
+              if (f.type === "select") {
+                const opts = String(f.options || "")
+                  .split(",")
+                  .map((x) => x.trim())
+                  .filter(Boolean)
+                  .map((opt) => {
+                    const parts = opt.split(":");
+                    return { label: parts[0] || opt, value: parts[1] || parts[0] || opt };
+                  });
+                return `<div class="field"><label>${escapeHtml(f.label || key)}</label><select data-key="${escapeHtml(key)}">${opts.map((o) => `<option value="${escapeHtml(o.value)}">${escapeHtml(o.label)}</option>`).join("")}</select></div>`;
+              }
+              const typeMap = { number: "number", date: "date", password: "password" };
+              const inputType = typeMap[f.type] || "text";
+              const value = escapeHtml(f.defaultText || "");
+              return `<div class="field"><label>${escapeHtml(f.label || key)}</label><input data-key="${escapeHtml(key)}" type="${inputType}" value="${value}" /></div>`;
+            })
+            .join("");
+        }
+        const actions = document.getElementById("actions");
+        actions.innerHTML = `<button class="btn btn-primary" id="submitForm">提交並下一步</button>`;
+        document.getElementById("submitForm").onclick = () => {
+          mount.querySelectorAll("[data-key]").forEach((el) => {
+            const key = el.getAttribute("data-key");
+            context.form[key] = el.type === "checkbox" ? el.checked : el.value;
+          });
+          log(`表單完成：${c.title || "未命名表單"}`);
+          currentNode = nextByGraph(node, true);
+          renderNode();
+        };
+      }
+
+      function runConditionStep(node) {
+        const c = node.config || {};
+        const left = context.form[c.sourceField] ?? "";
+        const right = c.compareFrom === "variable" ? readVar(c.compareVar) : c.compareValue;
+        const op = c.operator || "=";
+        let pass = false;
+        if (op === "=") pass = String(left) === String(right);
+        if (op === "≠") pass = String(left) !== String(right);
+        if (op === ">") pass = Number(left) > Number(right);
+        if (op === "<") pass = Number(left) < Number(right);
+        if (op === "包含") pass = String(left).includes(String(right));
+        log(`條件判斷：${c.sourceField || "欄位"} ${op} ${String(right)} => ${pass ? "True" : "False"}`);
+        currentNode = nextByGraph(node, pass);
+        renderNode();
+      }
+
+      function renderApprovalStep(node) {
+        const c = node.config || {};
+        const mount = document.getElementById("fields");
+        mount.innerHTML = `
+          <div class="field"><label>審核標題</label><input value="${escapeHtml(c.title || "")}" disabled /></div>
+          <div class="field"><label>審核人</label><input value="${escapeHtml(c.reviewer || "")}" disabled /></div>
+        `;
+        const actions = document.getElementById("actions");
+        actions.innerHTML = `
+          <button class="btn btn-soft" id="reject">Reject</button>
+          <button class="btn btn-primary" id="approve">Approve</button>
+        `;
+        document.getElementById("approve").onclick = () => {
+          context.approval[node.id] = "approve";
+          log(`審核通過：${c.title || "未命名審核"}`);
+          currentNode = nextByGraph(node, true);
+          renderNode();
+        };
+        document.getElementById("reject").onclick = () => {
+          context.approval[node.id] = "reject";
+          log(`審核退回：${c.title || "未命名審核"}`);
+          currentNode = nextByGraph(node, false);
+          renderNode();
+        };
+      }
+
+      function renderSendStep(node) {
+        const c = node.config || {};
+        const mount = document.getElementById("fields");
+        mount.innerHTML = `
+          <div class="field"><label>收件人</label><input value="${escapeHtml(c.to || "")}" /></div>
+          <div class="field"><label>主旨</label><input value="${escapeHtml(c.subject || "")}" /></div>
+          <div class="field"><label>內容</label><textarea>${escapeHtml(c.body || "")}</textarea></div>
+        `;
+        const actions = document.getElementById("actions");
+        actions.innerHTML = `<button class="btn btn-primary" id="send">模擬寄送並下一步</button>`;
+        document.getElementById("send").onclick = () => {
+          log(`已模擬寄送信件：${c.subject || "(無主旨)"}`);
+          currentNode = nextByGraph(node, true);
+          renderNode();
+        };
+      }
+
+      function renderAgentStep(node) {
+        const c = node.config || {};
+        const mount = document.getElementById("fields");
+        mount.innerHTML = `
+          <div class="result">Agent 任務：${escapeHtml(c.task || "分類")}<br/>輸入：${escapeHtml(c.input || "")}</div>
+        `;
+        const actions = document.getElementById("actions");
+        actions.innerHTML = `<button class="btn btn-primary" id="runAgent">執行 Agent 並下一步</button>`;
+        document.getElementById("runAgent").onclick = () => {
+          context.agent[node.id] = { result: `Agent(${c.task || "分類"}) 完成` };
+          log(`Agent 完成：${c.task || "分類"}`);
+          currentNode = nextByGraph(node, true);
+          renderNode();
+        };
+      }
+
+      function renderToolStep(node) {
+        const c = node.config || {};
+        const mount = document.getElementById("fields");
+        mount.innerHTML = `<div class="result">Provider：${escapeHtml(c.provider || "")} / 任務：${escapeHtml(c.taskType || "查詢")}</div>`;
+        const actions = document.getElementById("actions");
+        actions.innerHTML = `<button class="btn btn-primary" id="runTool">執行工具並下一步</button>`;
+        document.getElementById("runTool").onclick = () => {
+          context.tool[node.id] = { provider: c.provider, taskType: c.taskType };
+          log(`工具任務完成：${c.provider || "Unknown Provider"}`);
+          currentNode = nextByGraph(node, true);
+          renderNode();
+        };
+      }
+
+      function renderMailStep(node) {
+        const c = node.config || {};
+        const mount = document.getElementById("fields");
+        mount.innerHTML = `
+          <div class="field"><label>from</label><input id="mailFrom" value="${escapeHtml(c.from || "")}" /></div>
+          <div class="field"><label>subject</label><input id="mailSubject" value="${escapeHtml(c.subject || "")}" /></div>
+          <div class="field"><label>body</label><textarea id="mailBody">${escapeHtml("Mock email body")}</textarea></div>
+        `;
+        const actions = document.getElementById("actions");
+        actions.innerHTML = `<button class="btn btn-primary" id="readMail">讀取並下一步</button>`;
+        document.getElementById("readMail").onclick = () => {
+          context.mail.from = document.getElementById("mailFrom").value;
+          context.mail.subject = document.getElementById("mailSubject").value;
+          context.mail.body = document.getElementById("mailBody").value;
+          log(`已讀取信件：${context.mail.subject || "(無主旨)"}`);
+          currentNode = nextByGraph(node, true);
+          renderNode();
+        };
+      }
+
+      function readVar(path) {
+        if (!path) return "";
+        const segs = String(path).split(".");
+        let ptr = context;
+        for (const k of segs) {
+          if (ptr == null) return "";
+          ptr = ptr[k];
+        }
+        return ptr ?? "";
+      }
+
+      function autoPass(msg) {
+        log(msg);
+        currentNode = nextByGraph(currentNode, true);
+        renderNode();
+      }
+
+      function restart() {
+        context = { form: {}, mail: {}, agent: {}, tool: {}, approval: {} };
+        logs = [];
+        renderLogs();
+        currentNode = getStartNode();
+        renderNode();
+      }
+
+      document.getElementById("toBuilder").onclick = () => {
+        window.location.href = "./builder.html";
+      };
+      document.getElementById("restart").onclick = restart;
+
+      if (!loadPublished()) {
+        renderNoFlow();
+      } else {
+        restart();
+      }
+    </script>
+  </body>
+</html>
