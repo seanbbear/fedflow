@@ -48,8 +48,22 @@
         margin-bottom: 6px;
         cursor: pointer;
         font-weight: 700;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
       }
       .nav-btn.active { background: rgba(255, 255, 255, 0.16); }
+      .notify {
+        width: 18px;
+        height: 18px;
+        border-radius: 999px;
+        background: #ffd84d;
+        color: #6b4a00;
+        display: inline-grid;
+        place-items: center;
+        font-size: 12px;
+        font-weight: 900;
+      }
 
       .main { padding: 16px; overflow: auto; }
       .head {
@@ -164,7 +178,6 @@
         background: #e8f1ff;
         border-color: #b6caee;
       }
-
       .tab-alert {
         margin-left: 6px;
         display: inline-grid;
@@ -187,25 +200,476 @@
         color: #0d6a60;
         border: 1px solid #c6efe5;
       }
-
       .badge-warn {
         background: #fff6e6;
         color: #9a6200;
         border: 1px solid #f0d6a0;
       }
 
-      .approval-actions {
-        display: flex;
-        gap: 6px;
-      }
+      .approval-actions { display: flex; gap: 6px; }
 
       table { width: 100%; border-collapse: collapse; }
       th, td { text-align: left; padding: 10px; border-bottom: 1px solid #e4eaf8; font-size: 14px; }
       th { color: #49608b; font-weight: 700; }
 
+      .integration-shell {
+        border: 1px solid #dce4f2;
+        border-radius: 16px;
+        background: #f7f9fc;
+        padding: 12px;
+      }
+      .integration-top {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 16px;
+      }
+      .crumb {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-size: 18px;
+        font-weight: 700;
+        color: #2e54c2;
+      }
+      .crumb small {
+        font-size: 18px;
+        color: #6f8098;
+        font-weight: 600;
+      }
+      .avatar {
+        width: 38px;
+        height: 38px;
+        border-radius: 999px;
+        background: #d6dee9;
+      }
+      .integration-search {
+        width: 620px;
+        max-width: 100%;
+        border: 2px solid #d1d9e8;
+        border-radius: 999px;
+        background: #fff;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 7px 14px;
+        color: #8b99ad;
+        margin-bottom: 10px;
+      }
+      .integration-search input {
+        flex: 1;
+        border: 0;
+        outline: none;
+        font-size: 14px;
+        background: transparent;
+        color: #5a6f8c;
+      }
+      .integration-table-head {
+        background: #dfe4ec;
+        border-radius: 14px 14px 0 0;
+        display: grid;
+        grid-template-columns: 1.5fr 0.5fr 1fr;
+        gap: 10px;
+        padding: 10px 14px;
+        color: #2f3f58;
+        font-size: 16px;
+        font-weight: 700;
+      }
+      .integration-item {
+        border-bottom: 1px solid #d6deed;
+        background: #fff;
+      }
+      .integration-item-row {
+        display: grid;
+        grid-template-columns: 1.5fr 0.5fr 1fr;
+        gap: 10px;
+        padding: 9px 14px;
+        align-items: center;
+      }
+      .integration-name {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-size: 15px;
+        color: #2f3f58;
+        font-weight: 700;
+      }
+      .g-icon {
+        width: 34px;
+        height: 34px;
+        border-radius: 999px;
+        background: #d6daf7;
+        display: inline-grid;
+        place-items: center;
+        color: #3f57ca;
+        font-weight: 900;
+      }
+      .auth-chip {
+        display: inline-block;
+        padding: 3px 8px;
+        border-radius: 7px;
+        background: #dbeefe;
+        color: #1f6ed8;
+        font-size: 13px;
+        font-weight: 700;
+      }
+      .linked-count {
+        font-size: 15px;
+        color: #697c99;
+      }
+      .integration-links {
+        background: #eef1f6;
+        padding: 6px 12px 8px 52px;
+      }
+      .link-group {
+        border-radius: 12px;
+        padding: 6px;
+        margin-bottom: 6px;
+      }
+      .link-group.system-group {
+        background: #e5efff;
+        border: 1px solid #c5d8ff;
+      }
+      .link-group.user-group {
+        background: #f5f7fb;
+        border: 1px solid #dde5f2;
+      }
+      .group-title {
+        font-size: 11px;
+        font-weight: 700;
+        color: #5e7395;
+        margin: 1px 2px 4px;
+      }
+      .link-row {
+        display: grid;
+        grid-template-columns: 1fr auto;
+        column-gap: 16px;
+        align-items: center;
+        padding: 4px 0;
+        border-radius: 10px;
+        padding-left: 6px;
+        padding-right: 6px;
+        margin-bottom: 3px;
+      }
+      .link-row[data-system="true"] {
+        background: #eff5ff;
+        border: 1px solid #c9dbff;
+      }
+      .link-row:not([data-system="true"]) {
+        background: #f7f9fc;
+        border: 1px solid #e1e7f3;
+      }
+      .acct {
+        display: grid;
+        grid-template-columns: 26px 1fr;
+        align-items: center;
+        gap: 8px;
+        color: #6a7d97;
+        font-size: 15px;
+      }
+      .pin-btn {
+        border: 0;
+        background: transparent;
+        padding: 0;
+        width: 22px;
+        cursor: pointer;
+      }
+      .star {
+        color: #9eadbf;
+        font-size: 16px;
+      }
+      .star.main { color: #f5a102; }
+      .mail-text { display: inline-block; }
+      .system-tag {
+        display: inline-block;
+        margin-left: 8px;
+        border-radius: 999px;
+        padding: 2px 7px;
+        font-size: 12px;
+        color: #2657b8;
+        background: #dce9ff;
+        border: 1px solid #bcd2ff;
+        vertical-align: middle;
+      }
+      .unlink-btn {
+        border: 0;
+        background: transparent;
+        color: #f15533;
+        font-size: 15px;
+        cursor: pointer;
+        text-decoration: underline;
+      }
+      .add-link-btn {
+        border: 0;
+        background: transparent;
+        color: #3f57ca;
+        cursor: pointer;
+        font-size: 14px;
+        text-decoration: underline;
+        padding: 4px 0 2px;
+      }
+
+      .cred-shell {
+        border: 1px solid #dce4f2;
+        border-radius: 16px;
+        background: #f7f9fc;
+        padding: 16px;
+      }
+      .cred-top {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 14px;
+      }
+      .cred-search-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 14px;
+      }
+      .cred-search {
+        width: 480px;
+        max-width: 100%;
+        border: 1px solid #cfd8e8;
+        border-radius: 999px;
+        background: #fff;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        color: #8295b1;
+        padding: 8px 14px;
+      }
+      .cred-search input {
+        flex: 1;
+        border: 0;
+        outline: none;
+        font-size: 14px;
+        background: transparent;
+        color: #607491;
+      }
+      .cred-table {
+        border: 1px solid #d5deee;
+        border-radius: 14px;
+        overflow: hidden;
+        background: #fff;
+      }
+      .cred-head,
+      .cred-row {
+        display: grid;
+        grid-template-columns: 2fr 1fr 1fr 0.6fr;
+        gap: 10px;
+        align-items: center;
+        padding: 12px 14px;
+      }
+      .cred-head {
+        background: #dfe4ec;
+        color: #30405a;
+        font-weight: 700;
+      }
+      .cred-row {
+        border-top: 1px solid #e4eaf5;
+        color: #33455f;
+      }
+      .cred-delete {
+        border: 0;
+        background: transparent;
+        color: #697d9a;
+        text-decoration: underline;
+        cursor: pointer;
+        text-align: left;
+      }
+
+      .modal-mask {
+        position: fixed;
+        inset: 0;
+        background: rgba(20, 30, 48, 0.35);
+        display: grid;
+        place-items: center;
+        z-index: 60;
+        padding: 20px;
+      }
+      .modal {
+        width: 720px;
+        max-width: 100%;
+        max-height: 80vh;
+        background: #fff;
+        border-radius: 14px;
+        border: 1px solid #d5deee;
+        box-shadow: 0 26px 50px rgba(18, 35, 63, 0.2);
+        overflow: hidden;
+      }
+      .modal-head {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 14px 18px;
+        border-bottom: 1px solid #e3e9f6;
+        color: #637791;
+        font-weight: 700;
+      }
+      .modal-close {
+        border: 0;
+        background: transparent;
+        color: #6d7f98;
+        font-size: 20px;
+        cursor: pointer;
+      }
+      .modal-body {
+        padding: 14px 18px 18px;
+        max-height: calc(80vh - 56px);
+        overflow: auto;
+      }
+      .modal-step.hidden { display: none; }
+      .modal-search {
+        border: 2px solid #7f93f5;
+        border-radius: 999px;
+        padding: 8px 12px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        color: #8a9db8;
+        margin-bottom: 12px;
+      }
+      .modal-search input {
+        flex: 1;
+        border: 0;
+        outline: none;
+        font-size: 14px;
+      }
+      .provider-grid {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 10px;
+      }
+      .provider-item {
+        border: 1px solid #c9d3e6;
+        border-radius: 18px;
+        background: #fff;
+        text-align: left;
+        padding: 12px 14px;
+        color: #2f425e;
+        cursor: pointer;
+      }
+      .provider-item:hover { border-color: #93a8d3; }
+      .provider-guide {
+        border-radius: 16px;
+        background: #eef3fa;
+        padding: 14px 16px;
+        margin-bottom: 14px;
+      }
+      .provider-guide h4 {
+        margin: 0 0 8px;
+        font-size: 24px;
+        color: #30445f;
+      }
+      .provider-guide p {
+        margin: 0;
+        color: #4a5f7f;
+        font-size: 14px;
+      }
+      .provider-guide a { color: #2f52d1; }
+      .cred-form-row { margin-bottom: 10px; }
+      .cred-form-label {
+        display: block;
+        margin-bottom: 6px;
+        color: #697d98;
+        font-size: 13px;
+      }
+      .req { color: #d24f44; }
+      .cred-form-input {
+        width: 100%;
+        border: 1px solid #c8d2e5;
+        border-radius: 999px;
+        padding: 10px 14px;
+        font-size: 14px;
+        color: #445a79;
+        outline: none;
+      }
+      .role-box {
+        border: 1px solid #cfdaed;
+        border-radius: 12px;
+        background: #f7fafe;
+        padding: 8px;
+      }
+      .role-grid {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 6px;
+      }
+      .role-item {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 13px;
+        color: #496082;
+      }
+      .role-hint {
+        margin-top: 6px;
+        font-size: 12px;
+        color: #6f82a0;
+      }
+      .cred-action {
+        border: 0;
+        background: transparent;
+        color: #5e7396;
+        text-decoration: underline;
+        cursor: pointer;
+        margin-right: 8px;
+        padding: 0;
+      }
+      .modal-actions {
+        display: flex;
+        justify-content: flex-end;
+        gap: 8px;
+        margin-top: 14px;
+      }
+      .btn-round {
+        border: 0;
+        border-radius: 999px;
+        min-width: 94px;
+        padding: 10px 16px;
+        font-weight: 700;
+        cursor: pointer;
+      }
+      .btn-secondary { background: #8ea4b9; color: #fff; }
+      .btn-disabled {
+        background: #e8edf3;
+        color: #a6b3c4;
+        cursor: not-allowed;
+      }
+      .approval-detail { color: #4c6181; line-height: 1.6; }
+      .approval-title { margin: 0 0 10px; font-size: 18px; color: #2f425f; }
+      .btn-danger { background: #e86b5a; color: #fff; }
+
       @media (max-width: 980px) {
         .app { grid-template-columns: 1fr; }
         .flow-grid { grid-template-columns: 1fr; }
+        .integration-table-head,
+        .integration-item-row {
+          grid-template-columns: 1fr;
+          gap: 6px;
+        }
+        .integration-links {
+          padding-left: 18px;
+        }
+        .link-row {
+          gap: 8px;
+          grid-template-columns: 1fr;
+          justify-items: start;
+        }
+        .cred-head,
+        .cred-row {
+          grid-template-columns: 1fr;
+        }
+        .provider-grid {
+          grid-template-columns: 1fr;
+        }
+        .role-grid {
+          grid-template-columns: 1fr 1fr;
+        }
       }
     </style>
   </head>
@@ -214,8 +678,9 @@
       <aside class="sidebar">
         <h2 class="brand">FedFlow Console</h2>
         <button class="nav-btn active" data-page="flow-list">Flow 列表</button>
-        <button class="nav-btn" data-page="integration">權限整合</button>
-        <button class="nav-btn" data-page="interaction">我的 Flow</button>
+        <button class="nav-btn" data-page="integration">我的整合</button>
+        <button class="nav-btn" data-page="credential" id="credentialNavBtn">系統憑證</button>
+        <button class="nav-btn" data-page="interaction">我的 Flow <span class="notify hidden" id="myFlowNotify">!</span></button>
       </aside>
 
       <section class="main">
@@ -250,7 +715,7 @@
           <div class="head">
             <div>
               <h1>我的 Flow</h1>
-              <div class="muted">查看我建立或我參與的 Flow。</div>
+              <div class="muted">示意：我參與的 Flow 若有待審核，會顯示驚嘆號提醒。</div>
             </div>
             <button class="btn btn-soft" onclick="window.location.href='./chat.html'">前往對話執行</button>
           </div>
@@ -270,65 +735,202 @@
           <div id="tab-joined" class="panel hidden">
             <table>
               <thead><tr><th>Flow 名稱</th><th>審核節點</th><th>狀態</th><th>操作</th></tr></thead>
-              <tbody>
-                <tr>
+              <tbody id="joinedApprovalBody">
+                <tr data-approval-id="A-1001">
                   <td>請假申請流程</td>
                   <td>主管審核</td>
                   <td><span class="badge badge-warn">待你審核</span></td>
                   <td>
                     <div class="approval-actions">
-                      <button class="btn btn-soft" data-demo-approve="A-1001">通過</button>
-                      <button class="btn btn-soft" data-demo-reject="A-1001">退回</button>
+                      <button class="btn btn-soft" data-open-approval="A-1001">查看審核</button>
                     </div>
                   </td>
                 </tr>
-                <tr>
+                <tr data-approval-id="A-1002">
                   <td>費用報銷流程</td>
                   <td>財務審核</td>
                   <td><span class="badge badge-warn">待你審核</span></td>
                   <td>
                     <div class="approval-actions">
-                      <button class="btn btn-soft" data-demo-approve="A-1002">通過</button>
-                      <button class="btn btn-soft" data-demo-reject="A-1002">退回</button>
+                      <button class="btn btn-soft" data-open-approval="A-1002">查看審核</button>
                     </div>
                   </td>
                 </tr>
               </tbody>
             </table>
           </div>
+
+          <div id="approvalModal" class="modal-mask hidden">
+            <div class="modal">
+              <div class="modal-head">
+                <span>審核詳情</span>
+                <button class="modal-close" id="approvalModalClose">×</button>
+              </div>
+              <div class="modal-body">
+                <h3 class="approval-title" id="approvalModalFlowName">流程</h3>
+                <div class="approval-detail" id="approvalModalDetail"></div>
+                <div class="modal-actions">
+                  <button class="btn-round btn-secondary" id="approvalApproveBtn">同意</button>
+                  <button class="btn-round btn-danger" id="approvalRejectBtn">拒絕</button>
+                </div>
+              </div>
+            </div>
+          </div>
         </section>
 
         <section id="page-integration" class="hidden">
-          <div class="head">
-            <div>
-              <h1>權限整合</h1>
-              <div class="muted">管理工具連接與角色權限（Provider / OAuth / Scope）。</div>
+          <div class="integration-shell">
+            <div class="integration-top">
+              <div class="crumb">
+                <span>FedFlows</span>
+                <small>›</small>
+                <small>Integrations</small>
+              </div>
+              <div style="display:flex;align-items:center;gap:10px;color:#637790;font-size:18px;">
+                <span class="avatar"></span>
+                <span>fedgpt</span>
+              </div>
             </div>
-            <button class="btn btn-primary">儲存權限設定</button>
+
+            <label class="integration-search">
+              <span style="font-size:20px;">🔎</span>
+              <input id="integrationSearch" placeholder="搜尋" />
+            </label>
+
+            <div class="integration-table-head">
+              <span>名稱</span>
+              <span>權限</span>
+              <span>連結帳號</span>
+            </div>
+
+            <div class="integration-item" data-integration-item data-provider-key="gmail" data-name="gmail">
+              <div class="integration-item-row">
+                <div class="integration-name"><span class="g-icon">G</span> Gmail</div>
+                <div><span class="auth-chip">OAuth</span></div>
+                <div class="linked-count"><span data-link-count>3</span> 已連結</div>
+              </div>
+              <div class="integration-links">
+                <div class="link-group system-group">
+                  <div class="group-title">系統預設</div>
+                  <div class="system-rows" data-system-rows></div>
+                  <div class="muted" data-system-empty style="display:none;">尚未設定系統預設帳號</div>
+                </div>
+                <div class="link-group user-group" data-user-group>
+                  <div class="group-title">使用者帳號</div>
+                  <div class="link-row" data-email="sunny.hsu@gmail.com">
+                    <div class="acct"><button class="pin-btn" data-pin><span class="star main">★</span></button><span class="mail-text">sunny.hsu@gmail.com</span></div>
+                    <button class="unlink-btn" data-unlink>解除連結</button>
+                  </div>
+                  <div class="link-row" data-email="user3@gmail.com">
+                    <div class="acct"><button class="pin-btn" data-pin><span class="star">☆</span></button><span class="mail-text">user3@gmail.com</span></div>
+                    <button class="unlink-btn" data-unlink>解除連結</button>
+                  </div>
+                  <button class="add-link-btn" data-add-link>＋ 新增連結</button>
+                </div>
+              </div>
+            </div>
+
+            <div class="integration-item" data-integration-item data-provider-key="google_calendar" data-name="google calendar">
+              <div class="integration-item-row">
+                <div class="integration-name"><span class="g-icon">G</span> Google Calendar</div>
+                <div><span class="auth-chip">OAuth</span></div>
+                <div class="linked-count"><span data-link-count>1</span> 已連結</div>
+              </div>
+              <div class="integration-links">
+                <div class="link-group system-group">
+                  <div class="group-title">系統預設</div>
+                  <div class="system-rows" data-system-rows></div>
+                  <div class="muted" data-system-empty style="display:none;">尚未設定系統預設帳號</div>
+                </div>
+                <div class="link-group user-group" data-user-group>
+                  <div class="group-title">使用者帳號</div>
+                  <button class="add-link-btn" data-add-link>＋ 新增連結</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section id="page-credential" class="hidden">
+          <div class="cred-shell">
+            <div class="cred-top">
+              <div class="crumb">
+                <span>Flows</span>
+                <small>›</small>
+                <small>Credentials</small>
+              </div>
+            </div>
+
+            <div class="cred-search-row">
+              <label class="cred-search">
+                <span>🔎</span>
+                <input id="credentialSearchInput" placeholder="搜尋" />
+              </label>
+              <button class="btn btn-primary" id="credentialAddBtn">＋ 新增</button>
+            </div>
+
+            <div class="cred-table">
+              <div class="cred-head">
+                <span>名稱</span>
+                <span>更新時間</span>
+                <span>建立時間</span>
+                <span>動作</span>
+              </div>
+              <div id="credentialRows"></div>
+            </div>
           </div>
 
-          <div class="panel">
-            <h3 style="margin:0 0 10px;">預設整合：Gmail</h3>
-            <table>
-              <thead>
-                <tr>
-                  <th>Integration</th>
-                  <th>狀態</th>
-                  <th>帳號</th>
-                  <th>OAuth Scope</th>
-                  <th>可用角色</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td>Gmail Tool</td>
-                  <td><span class="badge">Connected</span></td>
-                  <td>service@fedflow.local</td>
-                  <td>gmail.readonly, gmail.send</td>
-                  <td>Benson, Sunny, Sean, Henry, HR, Ethan, Cheen</td>
-                </tr>
-              </tbody>
-            </table>
+          <div id="credentialModal" class="modal-mask hidden">
+            <div class="modal">
+              <div class="modal-head">
+                <span>Credentials › 新增</span>
+                <button class="modal-close" id="credentialModalClose">×</button>
+              </div>
+              <div class="modal-body">
+                <div id="providerPickerStep" class="modal-step">
+                  <label class="modal-search">
+                    <span>🔎</span>
+                    <input id="providerSearchInput" placeholder="搜尋" />
+                  </label>
+                  <div class="provider-grid" id="providerGrid"></div>
+                </div>
+
+                <div id="providerFormStep" class="modal-step hidden">
+                  <div class="provider-guide">
+                    <h4 id="selectedProviderTitle">Airtable API</h4>
+                    <p>
+                      Refer to <a href="#" id="providerGuideLink" target="_blank" rel="noreferrer noopener">official guide</a>
+                      on how to get accessToken on <span id="selectedProviderInline">Airtable</span>
+                    </p>
+                  </div>
+
+                  <div class="cred-form-row">
+                    <label class="cred-form-label">名稱 <span class="req">*</span></label>
+                    <input id="credentialNameInput" class="cred-form-input" placeholder="Credential name" />
+                  </div>
+                  <div class="cred-form-row">
+                    <label class="cred-form-label">系統帳號 <span class="req">*</span></label>
+                    <input id="credentialAccountInput" class="cred-form-input" placeholder="noreply@company.com" />
+                  </div>
+                  <div class="cred-form-row">
+                    <label class="cred-form-label">Access Token <span class="req">*</span></label>
+                    <input id="credentialTokenInput" class="cred-form-input" placeholder="<ACCESS_TOKEN>" />
+                  </div>
+                  <div class="cred-form-row">
+                    <label class="cred-form-label">可用角色 <span class="req">*</span></label>
+                    <div class="role-box">
+                      <div class="role-grid" id="credentialRoleGrid"></div>
+                      <div class="role-hint">至少選擇一個角色</div>
+                    </div>
+                  </div>
+
+                  <div class="modal-actions">
+                    <button class="btn-round btn-secondary" id="providerFormBackBtn">上一步</button>
+                    <button class="btn-round btn-disabled" id="providerCreateBtn" disabled>新增</button>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         </section>
       </section>
@@ -336,6 +938,36 @@
 
     <script>
       const FLOWS_KEY = "fedflow:flows";
+      const CREDENTIALS_KEY = "fedflow:credentials";
+      const ROLE_KEY = "fedflow:role";
+      const PROVIDER_CATALOG = ["Gmail", "Google Calendar"];
+      const MEMBER_ROLES = ["Benson", "Sunny", "Sean", "Henry", "HR", "Ethan", "Cheen"];
+      const APPROVAL_DEMOS = {
+        "A-1001": {
+          flowName: "請假申請流程",
+          node: "主管審核",
+          applicant: "Sean",
+          summary: "申請類型：特休\n日期：2026-03-07 ~ 2026-03-08\n原因：家庭事務"
+        },
+        "A-1002": {
+          flowName: "費用報銷流程",
+          node: "財務審核",
+          applicant: "Sunny",
+          summary: "金額：NT$3,280\n類型：交通費\n說明：客戶拜訪車資與停車費"
+        }
+      };
+      let selectedProvider = "";
+      let currentApprovalId = "";
+
+      function getCurrentRole() {
+        const fromQuery = new URLSearchParams(window.location.search).get("role");
+        if (fromQuery === "admin" || fromQuery === "user") {
+          localStorage.setItem(ROLE_KEY, fromQuery);
+          return fromQuery;
+        }
+        return localStorage.getItem(ROLE_KEY) === "admin" ? "admin" : "user";
+      }
+      const CURRENT_ROLE = getCurrentRole();
 
       function getAllFlows() {
         try {
@@ -357,6 +989,241 @@
         } catch (err) {
           return String(iso);
         }
+      }
+
+      function escapeHtml(value) {
+        return String(value || "")
+          .replaceAll("&", "&amp;")
+          .replaceAll("<", "&lt;")
+          .replaceAll(">", "&gt;")
+          .replaceAll("\"", "&quot;")
+          .replaceAll("'", "&#39;");
+      }
+
+      function getAllCredentials() {
+        try {
+          const parsed = JSON.parse(localStorage.getItem(CREDENTIALS_KEY) || "[]");
+          if (Array.isArray(parsed) && parsed.length) return parsed;
+        } catch (err) {}
+        const seed = [
+          {
+            id: "cred-sys-1",
+            providerKey: "gmail",
+            providerLabel: "Gmail",
+            account: "noreply@company.com",
+            name: "Gmail 系統寄信帳號",
+            allowedRoles: ["HR", "Sean", "Sunny"],
+            createdAt: "2025-07-14T15:53:00+08:00",
+            updatedAt: "2025-07-14T15:53:00+08:00"
+          },
+          {
+            id: "cred-sys-2",
+            providerKey: "google_calendar",
+            providerLabel: "Google Calendar",
+            account: "calendar-bot@company.com",
+            name: "Calendar 系統帳號",
+            allowedRoles: ["Benson", "Henry", "Sean"],
+            createdAt: "2025-07-15T12:10:00+08:00",
+            updatedAt: "2025-07-15T13:44:00+08:00"
+          }
+        ];
+        localStorage.setItem(CREDENTIALS_KEY, JSON.stringify(seed));
+        return seed;
+      }
+
+      function saveAllCredentials(list) {
+        localStorage.setItem(CREDENTIALS_KEY, JSON.stringify(list));
+      }
+
+      function renderCredentials() {
+        const list = getAllCredentials();
+        const q = (document.getElementById("credentialSearchInput")?.value || "").trim().toLowerCase();
+        const rows = document.getElementById("credentialRows");
+        if (!rows) return;
+        const filtered = q
+          ? list.filter((x) =>
+              `${x.name || ""} ${x.providerLabel || ""} ${x.account || ""}`.toLowerCase().includes(q)
+            )
+          : list;
+        if (!filtered.length) {
+          rows.innerHTML = `<div class="cred-row"><span class="muted">沒有符合的 Credential</span><span></span><span></span><span></span></div>`;
+          return;
+        }
+        rows.innerHTML = filtered.map((x) => `
+          <div class="cred-row">
+            <span>${escapeHtml(x.providerLabel || "-")} / ${escapeHtml(x.account || "-")}<br><span class="muted">${escapeHtml(x.name)}</span><br><span class="muted">角色：${escapeHtml((x.allowedRoles || []).join(", ") || "-")}</span></span>
+            <span>${fmtDateTime(x.updatedAt)}</span>
+            <span>${fmtDateTime(x.createdAt)}</span>
+            <span>
+              <button class="cred-action" data-cred-roles="${escapeHtml(x.id)}">設定角色</button>
+              <button class="cred-delete" data-cred-del="${escapeHtml(x.id)}">刪除</button>
+            </span>
+          </div>
+        `).join("");
+        rows.querySelectorAll("[data-cred-roles]").forEach((btn) => {
+          btn.addEventListener("click", () => {
+            const id = btn.getAttribute("data-cred-roles");
+            const list = getAllCredentials();
+            const target = list.find((x) => x.id === id);
+            if (!target) return;
+            const next = window.prompt("設定可用角色（用逗號分隔）", (target.allowedRoles || []).join(", "));
+            if (next == null) return;
+            const parsed = next
+              .split(",")
+              .map((x) => x.trim())
+              .filter(Boolean)
+              .filter((x) => MEMBER_ROLES.includes(x));
+            if (!parsed.length) {
+              alert("請至少設定一個有效角色");
+              return;
+            }
+            target.allowedRoles = parsed;
+            target.updatedAt = new Date().toISOString();
+            saveAllCredentials(list);
+            renderCredentials();
+            renderSystemDefaultsInIntegration();
+          });
+        });
+        rows.querySelectorAll("[data-cred-del]").forEach((btn) => {
+          btn.addEventListener("click", () => {
+            const id = btn.getAttribute("data-cred-del");
+            const next = getAllCredentials().filter((x) => x.id !== id);
+            saveAllCredentials(next);
+            renderCredentials();
+            renderSystemDefaultsInIntegration();
+          });
+        });
+      }
+
+      function renderSystemDefaultsInIntegration() {
+        const systemCreds = getAllCredentials();
+        document.querySelectorAll("[data-integration-item]").forEach((item) => {
+          const providerKey = item.getAttribute("data-provider-key");
+          const systemRows = item.querySelector("[data-system-rows]");
+          const emptyHint = item.querySelector("[data-system-empty]");
+          if (!systemRows) return;
+          const rows = systemCreds
+            .filter((x) => x.providerKey === providerKey)
+            .sort((a, b) => String(a.createdAt || "").localeCompare(String(b.createdAt || "")));
+          if (!rows.length) {
+            systemRows.innerHTML = "";
+            if (emptyHint) emptyHint.style.display = "block";
+          } else {
+            if (emptyHint) emptyHint.style.display = "none";
+            systemRows.innerHTML = rows
+              .map(
+                (x) => `
+              <div class="link-row" data-email="${escapeHtml(x.account)}" data-system="true">
+                <div class="acct"><span class="star main">★</span><span class="mail-text">${escapeHtml(x.account)} <span class="system-tag">系統預設</span></span></div>
+                <span class="muted">唯讀<br>角色：${escapeHtml((x.allowedRoles || []).join(", ") || "-")}</span>
+              </div>
+            `
+              )
+              .join("");
+          }
+          refreshIntegrationCount(item);
+        });
+      }
+
+      function renderProviderCatalog() {
+        const grid = document.getElementById("providerGrid");
+        const q = (document.getElementById("providerSearchInput")?.value || "").trim().toLowerCase();
+        if (!grid) return;
+        const filtered = q ? PROVIDER_CATALOG.filter((x) => x.toLowerCase().includes(q)) : PROVIDER_CATALOG;
+        grid.innerHTML = filtered.map((name) => `<button class="provider-item" data-provider-name="${escapeHtml(name)}">${escapeHtml(name)}</button>`).join("");
+        grid.querySelectorAll("[data-provider-name]").forEach((btn) => {
+          btn.addEventListener("click", () => {
+            const providerName = btn.getAttribute("data-provider-name");
+            openProviderForm(providerName);
+          });
+        });
+      }
+
+      function updateCreateButtonState() {
+        const name = (document.getElementById("credentialNameInput")?.value || "").trim();
+        const account = (document.getElementById("credentialAccountInput")?.value || "").trim();
+        const token = (document.getElementById("credentialTokenInput")?.value || "").trim();
+        const selectedRoles = Array.from(document.querySelectorAll(".role-check:checked")).map((el) => el.value);
+        const btn = document.getElementById("providerCreateBtn");
+        if (!btn) return;
+        const enabled = Boolean(selectedProvider && name && account && token && selectedRoles.length);
+        btn.disabled = !enabled;
+        btn.classList.toggle("btn-disabled", !enabled);
+        btn.classList.toggle("btn-primary", enabled);
+      }
+
+      function renderRoleSelector(defaultRoles = MEMBER_ROLES) {
+        const grid = document.getElementById("credentialRoleGrid");
+        if (!grid) return;
+        grid.innerHTML = MEMBER_ROLES.map((role) => `
+          <label class="role-item">
+            <input class="role-check" type="checkbox" value="${escapeHtml(role)}" ${defaultRoles.includes(role) ? "checked" : ""} />
+            <span>${escapeHtml(role)}</span>
+          </label>
+        `).join("");
+        grid.querySelectorAll(".role-check").forEach((el) => {
+          el.addEventListener("change", updateCreateButtonState);
+        });
+      }
+
+      function openProviderForm(providerName) {
+        selectedProvider = providerName || "";
+        document.getElementById("providerPickerStep")?.classList.add("hidden");
+        document.getElementById("providerFormStep")?.classList.remove("hidden");
+        document.getElementById("selectedProviderTitle").textContent = selectedProvider;
+        document.getElementById("selectedProviderInline").textContent = selectedProvider.replace(/\s*OAuth$/i, "").replace(/\s*API$/i, "");
+        const guideLink = document.getElementById("providerGuideLink");
+        if (guideLink) guideLink.href = `https://www.google.com/search?q=${encodeURIComponent(`${selectedProvider} official guide`)}`;
+        document.getElementById("credentialNameInput").value = "";
+        document.getElementById("credentialAccountInput").value = "";
+        document.getElementById("credentialTokenInput").value = "";
+        renderRoleSelector(MEMBER_ROLES);
+        updateCreateButtonState();
+      }
+
+      function backToProviderPicker() {
+        document.getElementById("providerFormStep")?.classList.add("hidden");
+        document.getElementById("providerPickerStep")?.classList.remove("hidden");
+        selectedProvider = "";
+        updateCreateButtonState();
+      }
+
+      function resetCredentialModal() {
+        document.getElementById("providerSearchInput").value = "";
+        document.getElementById("credentialNameInput").value = "";
+        document.getElementById("credentialAccountInput").value = "";
+        document.getElementById("credentialTokenInput").value = "";
+        selectedProvider = "";
+        document.getElementById("providerFormStep")?.classList.add("hidden");
+        document.getElementById("providerPickerStep")?.classList.remove("hidden");
+        renderRoleSelector(MEMBER_ROLES);
+        renderProviderCatalog();
+        updateCreateButtonState();
+      }
+
+      function createCredentialFromForm() {
+        const name = (document.getElementById("credentialNameInput")?.value || "").trim();
+        const account = (document.getElementById("credentialAccountInput")?.value || "").trim();
+        const token = (document.getElementById("credentialTokenInput")?.value || "").trim();
+        const allowedRoles = Array.from(document.querySelectorAll(".role-check:checked")).map((el) => el.value);
+        if (!selectedProvider || !name || !account || !token || !allowedRoles.length) return;
+        const providerKey = selectedProvider === "Gmail" ? "gmail" : "google_calendar";
+        const now = new Date().toISOString();
+        const list = getAllCredentials();
+        list.unshift({
+          id: `cred-${Date.now()}`,
+          providerKey,
+          providerLabel: selectedProvider,
+          account,
+          name,
+          allowedRoles,
+          createdAt: now,
+          updatedAt: now
+        });
+        saveAllCredentials(list);
+        renderCredentials();
+        renderSystemDefaultsInIntegration();
+        document.getElementById("credentialModal")?.classList.add("hidden");
       }
 
       function openBuilder(id) {
@@ -383,6 +1250,40 @@
         const first = (flow || [])[0];
         if (!first) return "尚未加入節點";
         return first.name || first.type || "未命名節點";
+      }
+
+      function refreshJoinedAlert() {
+        const joinedBody = document.getElementById("joinedApprovalBody");
+        const hasPending = Boolean(joinedBody?.querySelector(".badge-warn"));
+        document.getElementById("joinedAlert").classList.toggle("hidden", !hasPending);
+        document.getElementById("myFlowNotify").classList.toggle("hidden", !hasPending);
+      }
+
+      function markApproval(id, approved) {
+        const row = document.querySelector(`#joinedApprovalBody tr[data-approval-id="${id}"]`);
+        if (!row) return;
+        const statusCell = row.querySelector(".badge, .badge-warn");
+        if (statusCell) {
+          statusCell.classList.remove("badge-warn");
+          statusCell.classList.add("badge");
+          statusCell.textContent = approved ? "已同意" : "已拒絕";
+        }
+        const actionCell = row.querySelector(".approval-actions");
+        if (actionCell) actionCell.innerHTML = '<span class="muted">已處理</span>';
+        refreshJoinedAlert();
+      }
+
+      function openApprovalModal(id) {
+        const data = APPROVAL_DEMOS[id];
+        if (!data) return;
+        currentApprovalId = id;
+        document.getElementById("approvalModalFlowName").textContent = `${data.flowName} / ${data.node}`;
+        document.getElementById("approvalModalDetail").innerHTML = `
+          <div>單號：${id}</div>
+          <div>申請人：${data.applicant}</div>
+          <div style="white-space:pre-line;margin-top:8px;">${data.summary}</div>
+        `;
+        document.getElementById("approvalModal").classList.remove("hidden");
       }
 
       function renderFlowViews() {
@@ -459,11 +1360,12 @@
       }
 
       function switchPage(page) {
-        ["flow-list", "interaction", "integration"].forEach((p) => {
-          document.getElementById(`page-${p}`).classList.toggle("hidden", p !== page);
+        const nextPage = page === "credential" && CURRENT_ROLE !== "admin" ? "integration" : page;
+        ["flow-list", "interaction", "integration", "credential"].forEach((p) => {
+          document.getElementById(`page-${p}`).classList.toggle("hidden", p !== nextPage);
         });
         document.querySelectorAll(".nav-btn").forEach((btn) => {
-          btn.classList.toggle("active", btn.getAttribute("data-page") === page);
+          btn.classList.toggle("active", btn.getAttribute("data-page") === nextPage);
         });
       }
 
@@ -481,57 +1383,140 @@
         });
       });
 
-      document.querySelectorAll("[data-demo-approve]").forEach((btn) => {
-        btn.addEventListener("click", () => {
-          const id = btn.getAttribute("data-demo-approve");
-          const row = btn.closest("tr");
-          if (row) {
-            const statusCell = row.querySelector(".badge-warn");
-            if (statusCell) {
-              statusCell.classList.remove("badge-warn");
-              statusCell.classList.add("badge");
-              statusCell.textContent = "已通過";
-            }
-            const actionCell = row.querySelector(".approval-actions");
-            if (actionCell) actionCell.innerHTML = '<span class="muted">已處理</span>';
-          }
-          refreshJoinedAlert();
-          alert(`示意：審核單 ${id} 已通過`);
-        });
+      document.querySelectorAll("[data-open-approval]").forEach((btn) => {
+        btn.addEventListener("click", () => openApprovalModal(btn.getAttribute("data-open-approval")));
       });
-      document.querySelectorAll("[data-demo-reject]").forEach((btn) => {
-        btn.addEventListener("click", () => {
-          const id = btn.getAttribute("data-demo-reject");
-          const row = btn.closest("tr");
-          if (row) {
-            const statusCell = row.querySelector(".badge-warn");
-            if (statusCell) {
-              statusCell.classList.remove("badge-warn");
-              statusCell.classList.add("badge");
-              statusCell.textContent = "已退回";
-            }
-            const actionCell = row.querySelector(".approval-actions");
-            if (actionCell) actionCell.innerHTML = '<span class="muted">已處理</span>';
-          }
-          refreshJoinedAlert();
-          alert(`示意：審核單 ${id} 已退回`);
-        });
+      document.getElementById("approvalModalClose")?.addEventListener("click", () => {
+        document.getElementById("approvalModal")?.classList.add("hidden");
       });
-
-      function refreshJoinedAlert() {
-        const joinedBody = document.querySelector("#tab-joined tbody");
-        const hasPending = Boolean(joinedBody?.querySelector(".badge-warn"));
-        document.getElementById("joinedAlert").classList.toggle("hidden", !hasPending);
-      }
+      document.getElementById("approvalModal")?.addEventListener("click", (e) => {
+        if (e.target.id === "approvalModal") e.currentTarget.classList.add("hidden");
+      });
+      document.getElementById("approvalApproveBtn")?.addEventListener("click", () => {
+        if (!currentApprovalId) return;
+        markApproval(currentApprovalId, true);
+        document.getElementById("approvalModal")?.classList.add("hidden");
+      });
+      document.getElementById("approvalRejectBtn")?.addEventListener("click", () => {
+        if (!currentApprovalId) return;
+        markApproval(currentApprovalId, false);
+        document.getElementById("approvalModal")?.classList.add("hidden");
+      });
 
       document.getElementById("newFlowBtn").addEventListener("click", () => {
         window.location.href = "./builder.html";
       });
       document.getElementById("searchInput").addEventListener("input", renderFlowViews);
       document.getElementById("sortBy").addEventListener("change", renderFlowViews);
+      document.getElementById("credentialSearchInput")?.addEventListener("input", renderCredentials);
+
+      function refreshIntegrationCount(item) {
+        if (!item) return;
+        const countEl = item.querySelector("[data-link-count]");
+        if (!countEl) return;
+        const count = item.querySelectorAll(".integration-links .link-row").length;
+        countEl.textContent = String(count);
+      }
+
+      function pinIntegrationRow(item, row) {
+        if (!item || !row) return;
+        if (row.getAttribute("data-system") === "true") return;
+        const userGroup = item.querySelector("[data-user-group]");
+        userGroup?.querySelectorAll("[data-pin] .star").forEach((el) => {
+          el.textContent = "☆";
+          el.classList.remove("main");
+        });
+        const star = row.querySelector("[data-pin] .star");
+        if (star) {
+          star.textContent = "★";
+          star.classList.add("main");
+        }
+        const firstRow = userGroup?.querySelector(".link-row:not([data-system='true'])");
+        if (userGroup) {
+          if (firstRow && firstRow !== row) {
+            userGroup.insertBefore(row, firstRow);
+          } else if (!firstRow) {
+            const addBtn = userGroup.querySelector("[data-add-link]");
+            userGroup.insertBefore(row, addBtn || null);
+          }
+        }
+      }
+
+      document.querySelectorAll(".integration-links").forEach((wrap) => {
+        wrap.addEventListener("click", (e) => {
+          const item = wrap.closest("[data-integration-item]");
+          if (!item) return;
+
+          const pinBtn = e.target.closest("[data-pin]");
+          if (pinBtn) {
+            const row = pinBtn.closest(".link-row");
+            pinIntegrationRow(item, row);
+            return;
+          }
+
+          const unlinkBtn = e.target.closest("[data-unlink]");
+          if (unlinkBtn) {
+            const row = unlinkBtn.closest(".link-row");
+            if (row) row.remove();
+            refreshIntegrationCount(item);
+            return;
+          }
+
+          const addBtn = e.target.closest("[data-add-link]");
+          if (addBtn) {
+            const nextLabel = window.prompt("輸入要連結的帳號", "new.user@gmail.com");
+            if (!nextLabel) return;
+            const userGroup = item.querySelector("[data-user-group]");
+            if (!userGroup) return;
+            const row = document.createElement("div");
+            row.className = "link-row";
+            row.setAttribute("data-email", nextLabel);
+            row.innerHTML = `
+              <div class="acct"><button class="pin-btn" data-pin><span class="star">☆</span></button><span class="mail-text">${escapeHtml(nextLabel)}</span></div>
+              <button class="unlink-btn" data-unlink>解除連結</button>
+            `;
+            userGroup.insertBefore(row, addBtn);
+            refreshIntegrationCount(item);
+          }
+        });
+      });
+
+      document.getElementById("integrationSearch")?.addEventListener("input", (e) => {
+        const q = String(e.target.value || "").trim().toLowerCase();
+        document.querySelectorAll("[data-integration-item]").forEach((item) => {
+          const name = String(item.getAttribute("data-name") || "");
+          item.classList.toggle("hidden", q && !name.includes(q));
+        });
+      });
+
+      document.getElementById("credentialAddBtn")?.addEventListener("click", () => {
+        document.getElementById("credentialModal")?.classList.remove("hidden");
+        resetCredentialModal();
+      });
+      document.getElementById("credentialModalClose")?.addEventListener("click", () => {
+        document.getElementById("credentialModal")?.classList.add("hidden");
+      });
+      document.getElementById("credentialModal")?.addEventListener("click", (e) => {
+        if (e.target.id === "credentialModal") {
+          e.currentTarget.classList.add("hidden");
+        }
+      });
+      document.getElementById("providerSearchInput")?.addEventListener("input", renderProviderCatalog);
+      document.getElementById("providerFormBackBtn")?.addEventListener("click", backToProviderPicker);
+      document.getElementById("providerCreateBtn")?.addEventListener("click", createCredentialFromForm);
+      document.getElementById("credentialNameInput")?.addEventListener("input", updateCreateButtonState);
+      document.getElementById("credentialAccountInput")?.addEventListener("input", updateCreateButtonState);
+      document.getElementById("credentialTokenInput")?.addEventListener("input", updateCreateButtonState);
+
+      if (CURRENT_ROLE !== "admin") {
+        document.getElementById("credentialNavBtn")?.classList.add("hidden");
+      }
 
       switchPage("flow-list");
       renderFlowViews();
+      renderCredentials();
+      renderSystemDefaultsInIntegration();
+      renderProviderCatalog();
       refreshJoinedAlert();
     </script>
   </body>
