@@ -53,6 +53,17 @@
         justify-content: space-between;
       }
       .nav-btn.active { background: rgba(255, 255, 255, 0.16); }
+      .sidebar-divider {
+        height: 1px;
+        background: rgba(255, 255, 255, 0.2);
+        margin: 14px 8px 10px;
+      }
+      .sidebar-group-label {
+        margin: 0 12px 8px;
+        font-size: 12px;
+        color: rgba(234, 242, 255, 0.72);
+        letter-spacing: 0.04em;
+      }
       .notify {
         width: 18px;
         height: 18px;
@@ -66,6 +77,31 @@
       }
 
       .main { padding: 16px; overflow: auto; }
+      .global-topbar {
+        display: flex;
+        justify-content: flex-end;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 12px;
+      }
+      .role-switch {
+        border: 1px solid #ccd7ea;
+        background: #fff;
+        border-radius: 999px;
+        padding: 8px 12px;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        color: #5f7191;
+        font-size: 13px;
+      }
+      .role-switch select {
+        border: 0;
+        background: transparent;
+        color: #284a83;
+        font-weight: 700;
+        outline: none;
+      }
       .head {
         display: flex;
         justify-content: space-between;
@@ -101,23 +137,81 @@
         align-items: center;
         margin-bottom: 12px;
       }
+      .flow-page-top {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 16px;
+        margin-bottom: 18px;
+      }
+      .catalog-shell {
+        max-width: 1060px;
+        margin: 0 auto;
+      }
+      .flow-page-title {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        color: #6f8098;
+      }
+      .flow-page-title h1 {
+        margin: 0;
+        font-size: 18px;
+        font-weight: 700;
+        color: #5b6f8f;
+      }
+      .flow-page-icon {
+        width: 38px;
+        height: 38px;
+        border-radius: 12px;
+        background: #eff3fa;
+        display: inline-grid;
+        place-items: center;
+        color: #8395ad;
+        font-size: 18px;
+      }
+      .user-chip {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        color: #6d7f98;
+        font-weight: 700;
+      }
+      .user-avatar {
+        width: 34px;
+        height: 34px;
+        border-radius: 999px;
+        background: linear-gradient(180deg, #dde6f2, #cad5e7);
+        display: inline-grid;
+        place-items: center;
+        color: #7a8da8;
+        font-size: 16px;
+      }
+      .flow-toolbar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 16px;
+        margin-bottom: 22px;
+      }
       .search-wrap {
         display: flex;
-        width: 520px;
+        width: 556px;
         max-width: 100%;
         border: 1px solid #cfd7e5;
         border-radius: 999px;
         overflow: hidden;
         background: #fff;
+        box-shadow: 0 1px 0 rgba(196, 208, 228, 0.24);
       }
       .search-wrap select,
       .search-wrap input {
         border: 0;
-        padding: 9px 12px;
-        font-size: 13px;
+        padding: 12px 14px;
+        font-size: 14px;
         color: #586e8f;
       }
-      .search-wrap select { width: 160px; border-right: 1px solid #e2e7f0; }
+      .search-wrap select { width: 176px; border-right: 1px solid #e2e7f0; }
       .search-wrap input { flex: 1; outline: none; }
 
       .toolbar-right { display: flex; align-items: center; gap: 8px; color: #6f82a0; }
@@ -131,38 +225,110 @@
       .flow-grid {
         display: grid;
         grid-template-columns: 1fr 1fr;
-        gap: 12px;
+        gap: 20px;
       }
       .flow-card {
-        border: 1px solid #dce4f2;
+        border: 1px solid #e4eaf5;
         background: #eef2f7;
-        border-radius: 16px;
-        padding: 14px;
+        border-radius: 24px;
+        padding: 22px 24px 18px;
         cursor: pointer;
+        min-height: 290px;
       }
-      .flow-card:hover { border-color: #b7c8ea; }
+      .flow-card:hover { border-color: #c5d4ef; }
       .flow-card-top { display: flex; justify-content: space-between; align-items: start; gap: 8px; }
+      .flow-card-title {
+        display: flex;
+        align-items: flex-start;
+        gap: 10px;
+      }
+      .flow-card-icon {
+        margin-top: 2px;
+        color: #7e92ad;
+        font-size: 18px;
+        line-height: 1;
+      }
       .flow-name {
         border: 0;
         padding: 0;
         background: transparent;
-        color: #304a72;
-        font-size: 18px;
+        color: #374b68;
+        font-size: 17px;
         font-weight: 800;
         text-align: left;
         cursor: pointer;
       }
       .flow-name:hover { text-decoration: underline; }
-      .dots { color: #5c7294; font-weight: 700; }
-      .flow-desc { margin-top: 8px; color: #5f7492; font-size: 13px; min-height: 36px; }
-      .flow-meta { margin-top: 8px; color: #6e82a0; font-size: 12px; display: grid; gap: 3px; }
-      .flow-hr { margin: 12px 0 8px; border-top: 1px solid #d4deec; }
+      .dots { color: #1f2d3d; font-weight: 800; font-size: 24px; line-height: 1; }
+      .flow-desc { margin-top: 16px; color: #566b89; font-size: 15px; min-height: 34px; }
+      .flow-meta { margin-top: 12px; color: #6e82a0; font-size: 12px; display: grid; gap: 7px; }
+      .flow-hr { margin: 56px 0 14px; border-top: 1px solid #d4deec; }
       .flow-foot { display: flex; justify-content: space-between; align-items: center; color: #6b7e9b; font-size: 12px; }
       .state { display: inline-flex; align-items: center; gap: 6px; }
       .dot { width: 10px; height: 10px; border-radius: 999px; background: #9fb1c7; }
       .dot.ok { background: #4ba915; }
 
-      .inline-actions { margin-top: 10px; display: flex; gap: 8px; }
+      .inline-actions { display: none; }
+      .action-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 20px;
+      }
+      .action-card {
+        border: 1px solid #e4eaf5;
+        background: #eef2f7;
+        border-radius: 24px;
+        padding: 22px 24px 18px;
+        min-height: 290px;
+      }
+      .action-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        border-radius: 999px;
+        padding: 3px 9px;
+        background: #e9fff8;
+        color: #0d6a60;
+        border: 1px solid #c6efe5;
+        font-size: 11px;
+        font-weight: 700;
+      }
+      .action-type {
+        margin-top: 8px;
+        color: #5e7395;
+        font-size: 12px;
+      }
+      .action-fields {
+        margin-top: 16px;
+        color: #6a7d97;
+        font-size: 12px;
+        line-height: 1.65;
+      }
+      .action-meta {
+        margin-top: 12px;
+        color: #6e82a0;
+        font-size: 12px;
+        display: grid;
+        gap: 7px;
+      }
+      .action-fields strong {
+        color: #3f5576;
+        font-weight: 700;
+      }
+      .action-card .flow-name {
+        font-size: 17px;
+      }
+      .action-card .flow-desc {
+        margin-top: 14px;
+        font-size: 14px;
+        min-height: 40px;
+      }
+      .action-card .flow-hr {
+        margin: 42px 0 12px;
+      }
+      .action-card .flow-foot {
+        font-size: 12px;
+      }
 
       .tabs { display: flex; gap: 8px; margin-bottom: 12px; }
       .tab {
@@ -647,6 +813,15 @@
       @media (max-width: 980px) {
         .app { grid-template-columns: 1fr; }
         .flow-grid { grid-template-columns: 1fr; }
+        .action-grid { grid-template-columns: 1fr; }
+        .flow-toolbar,
+        .flow-page-top {
+          flex-direction: column;
+          align-items: stretch;
+        }
+        .toolbar-right {
+          justify-content: space-between;
+        }
         .integration-table-head,
         .integration-item-row {
           grid-template-columns: 1fr;
@@ -677,44 +852,219 @@
     <main class="app">
       <aside class="sidebar">
         <h2 class="brand">FedFlow Console</h2>
-        <button class="nav-btn active" data-page="flow-list">Flow 列表</button>
-        <button class="nav-btn" data-page="integration">我的整合</button>
-        <button class="nav-btn" data-page="credential" id="credentialNavBtn">系統憑證</button>
-        <button class="nav-btn" data-page="interaction">我的 Flow <span class="notify hidden" id="myFlowNotify">!</span></button>
+        <button class="nav-btn active" data-page="flow-list">flow list</button>
+        <button class="nav-btn" data-page="action-list">action list</button>
+        <button class="nav-btn" data-page="marketplace">Marketplace</button>
+        <button class="nav-btn" data-page="integration">連接應用服務</button>
+        <button class="nav-btn" data-page="credential" id="credentialNavBtn">第三方服務設定</button>
+        <div class="sidebar-divider"></div>
+        <div class="sidebar-group-label">個人</div>
+        <button class="nav-btn" data-page="interaction">任務中心 <span class="notify hidden" id="myFlowNotify">!</span></button>
       </aside>
 
       <section class="main">
+        <div class="global-topbar">
+          <label class="role-switch">
+            <span>目前視角</span>
+            <select id="roleViewSelect">
+              <option value="manager">流程管理者</option>
+              <option value="mis">MIS</option>
+            </select>
+          </label>
+        </div>
+
         <section id="page-flow-list">
+          <div class="catalog-shell">
+            <div class="flow-page-top">
+              <div class="flow-page-title">
+                <span class="flow-page-icon">☰</span>
+                <h1>Flows</h1>
+              </div>
+              <div class="user-chip">
+                <span class="user-avatar">◉</span>
+                <span>fedgpt</span>
+              </div>
+            </div>
+
+            <div class="flow-toolbar">
+              <div class="search-wrap">
+                <select id="searchBy"><option value="name">搜尋關鍵字</option></select>
+                <input id="searchInput" placeholder="搜尋名稱" />
+              </div>
+              <div class="toolbar-right">
+                <span>排序：</span>
+                <select id="sortBy" class="sort-select">
+                  <option value="updated_desc">最新更新時間</option>
+                  <option value="updated_asc">最舊更新時間</option>
+                  <option value="name_asc">名稱 A-Z</option>
+                </select>
+                <button class="btn btn-primary" id="newFlowBtn">＋ 新增</button>
+              </div>
+            </div>
+
+            <div class="flow-grid" id="flowGrid"></div>
+          </div>
+        </section>
+
+        <section id="page-action-list" class="hidden">
+          <div class="catalog-shell">
+            <div class="flow-page-top">
+              <div class="flow-page-title">
+                <span class="flow-page-icon">☰</span>
+                <h1>Actions</h1>
+              </div>
+              <div class="user-chip">
+                <span class="user-avatar">◉</span>
+                <span>fedgpt</span>
+              </div>
+            </div>
+
+            <div class="flow-toolbar">
+              <div class="search-wrap">
+                <select><option>搜尋關鍵字</option></select>
+                <input placeholder="搜尋 Action 名稱" />
+              </div>
+              <div class="toolbar-right">
+                <span>排序：</span>
+                <select class="sort-select">
+                  <option>名稱 A-Z</option>
+                  <option>最新更新時間</option>
+                </select>
+                <button class="btn btn-primary">＋ 新增</button>
+              </div>
+            </div>
+
+            <div class="action-grid">
+              <article class="action-card" data-open-action="form" data-action-name="表單">
+                <div class="flow-card-top">
+                  <div class="flow-card-title">
+                    <span class="flow-card-icon">⚯</span>
+                    <div>
+                      <button class="flow-name">表單</button>
+                      <div class="action-type">Form Action</div>
+                    </div>
+                  </div>
+                  <span class="dots">•••</span>
+                </div>
+                <div class="flow-desc">收集資料並產生 `form.*` 變數，適合申請、填報、建立輸入來源。</div>
+                <div class="action-meta">
+                  <div>更新時間：2026-04-08 15:33</div>
+                  <div>建立者：fedgpt</div>
+                </div>
+                <div class="action-fields">
+                  <div><strong>支援欄位：</strong>text, password, number, date, checkbox, file, select, list</div>
+                </div>
+                <div class="flow-hr"></div>
+                <div class="flow-foot">
+                  <span class="action-badge">Enabled</span>
+                  <span>標準 Action</span>
+                </div>
+              </article>
+
+              <article class="action-card" data-open-action="condition" data-action-name="判斷">
+                <div class="flow-card-top">
+                  <div class="flow-card-title">
+                    <span class="flow-card-icon">⚯</span>
+                    <div>
+                      <button class="flow-name">判斷</button>
+                      <div class="action-type">Condition Action</div>
+                    </div>
+                  </div>
+                  <span class="dots">•••</span>
+                </div>
+                <div class="flow-desc">依條件進行 True / False 分流，用來處理金額、天數、欄位值判斷。</div>
+                <div class="action-meta">
+                  <div>更新時間：2026-04-07 16:09</div>
+                  <div>建立者：fedgpt</div>
+                </div>
+                <div class="action-fields">
+                  <div><strong>支援比較：</strong>=, ≠, &gt;, &lt;, 包含</div>
+                </div>
+                <div class="flow-hr"></div>
+                <div class="flow-foot">
+                  <span class="action-badge">Enabled</span>
+                  <span>標準 Action</span>
+                </div>
+              </article>
+
+              <article class="action-card" data-open-action="approval" data-action-name="審核">
+                <div class="flow-card-top">
+                  <div class="flow-card-title">
+                    <span class="flow-card-icon">⚯</span>
+                    <div>
+                      <button class="flow-name">審核</button>
+                      <div class="action-type">Approval Action</div>
+                    </div>
+                  </div>
+                  <span class="dots">•••</span>
+                </div>
+                <div class="flow-desc">發起人工審核並取得 approve / reject 結果，適合主管或財務簽核。</div>
+                <div class="action-meta">
+                  <div>更新時間：2026-03-26 10:15</div>
+                  <div>建立者：fedgpt</div>
+                </div>
+                <div class="action-fields">
+                  <div><strong>主要欄位：</strong>審核標題、審核人、申請人、SLA</div>
+                </div>
+                <div class="flow-hr"></div>
+                <div class="flow-foot">
+                  <span class="action-badge">Enabled</span>
+                  <span>標準 Action</span>
+                </div>
+              </article>
+
+              <article class="action-card" data-open-action="sendAsUser" data-action-name="使用者寄信">
+                <div class="flow-card-top">
+                  <div class="flow-card-title">
+                    <span class="flow-card-icon">⚯</span>
+                    <div>
+                      <button class="flow-name">使用者寄信</button>
+                      <div class="action-type">Send as User</div>
+                    </div>
+                  </div>
+                  <span class="dots">•••</span>
+                </div>
+                <div class="flow-desc">代表流程執行者寄送通知或結果信件，適合申請回覆與對外回信。</div>
+                <div class="action-meta">
+                  <div>更新時間：2026-03-25 17:47</div>
+                  <div>建立者：mavis</div>
+                </div>
+                <div class="action-fields">
+                  <div><strong>主要欄位：</strong>收件人、主旨、內容、附件</div>
+                </div>
+                <div class="flow-hr"></div>
+                <div class="flow-foot">
+                  <span class="action-badge">Enabled</span>
+                  <span>標準 Action</span>
+                </div>
+              </article>
+            </div>
+          </div>
+        </section>
+
+        <section id="page-marketplace" class="hidden">
           <div class="head">
             <div>
-              <h1>Flow 列表</h1>
-              <div class="muted">管理所有 Flow，並可進入 Canvas 建立新流程。</div>
-            </div>
-            <button class="btn btn-primary" id="newFlowBtn">＋ 新增</button>
-          </div>
-
-          <div class="toolbar">
-            <div class="search-wrap">
-              <select id="searchBy"><option value="name">搜尋關鍵字</option></select>
-              <input id="searchInput" placeholder="搜尋名稱" />
-            </div>
-            <div class="toolbar-right">
-              <span>排序：</span>
-              <select id="sortBy" class="sort-select">
-                <option value="updated_desc">最新更新時間</option>
-                <option value="updated_asc">最舊更新時間</option>
-                <option value="name_asc">名稱 A-Z</option>
-              </select>
+              <h1>Marketplace</h1>
+              <div class="muted">瀏覽可重用的 Flow 模板與部門範本。</div>
             </div>
           </div>
-
-          <div class="flow-grid" id="flowGrid"></div>
+          <div class="flow-grid">
+            <article class="flow-card">
+              <div class="flow-card-top"><strong>請假申請</strong><span class="dots">HR</span></div>
+              <div class="flow-desc">表單 → 判斷 → 主管審核 → 使用者寄信</div>
+            </article>
+            <article class="flow-card">
+              <div class="flow-card-top"><strong>費用報銷</strong><span class="dots">Finance</span></div>
+              <div class="flow-desc">表單 → 金額判斷 → 主管審核 → 財務審核</div>
+            </article>
+          </div>
         </section>
 
         <section id="page-interaction" class="hidden">
           <div class="head">
             <div>
-              <h1>我的 Flow</h1>
+              <h1>任務中心</h1>
               <div class="muted">示意：我參與的 Flow 若有待審核，會顯示驚嘆號提醒。</div>
             </div>
             <button class="btn btn-soft" onclick="window.location.href='./chat.html'">前往對話執行</button>
@@ -939,8 +1289,12 @@
     <script>
       const FLOWS_KEY = "fedflow:flows";
       const CREDENTIALS_KEY = "fedflow:credentials";
-      const ROLE_KEY = "fedflow:role";
+      const ROLE_KEY = "fedflow:view-role";
       const PROVIDER_CATALOG = ["Gmail", "Google Calendar"];
+      const ROLE_PAGE_ACCESS = {
+        manager: ["flow-list", "marketplace", "integration", "interaction"],
+        mis: ["flow-list", "action-list", "marketplace", "integration", "credential", "interaction"]
+      };
       const MEMBER_ROLES = ["Benson", "Sunny", "Sean", "Henry", "HR", "Ethan", "Cheen"];
       const APPROVAL_DEMOS = {
         "A-1001": {
@@ -960,22 +1314,44 @@
       let currentApprovalId = "";
 
       function getCurrentRole() {
-        const fromQuery = new URLSearchParams(window.location.search).get("role");
-        if (fromQuery === "admin" || fromQuery === "user") {
-          localStorage.setItem(ROLE_KEY, fromQuery);
-          return fromQuery;
-        }
-        return localStorage.getItem(ROLE_KEY) === "admin" ? "admin" : "user";
+        const stored = localStorage.getItem(ROLE_KEY);
+        return stored === "mis" ? "mis" : "manager";
       }
-      const CURRENT_ROLE = getCurrentRole();
+      let CURRENT_ROLE = getCurrentRole();
 
       function getAllFlows() {
         try {
           const parsed = JSON.parse(localStorage.getItem(FLOWS_KEY) || "[]");
-          return Array.isArray(parsed) ? parsed : [];
+          if (Array.isArray(parsed) && parsed.length) return parsed;
         } catch (err) {
-          return [];
         }
+        const seed = [
+          {
+            id: "seed-business-trip-expense",
+            name: "出差經費申請",
+            createdAt: "2026-04-07T14:20:00+08:00",
+            updatedAt: "2026-04-08T11:10:00+08:00",
+            flow: [
+              { id: "form-1", type: "form", name: "出差申請表單" },
+              { id: "approval-1", type: "approval", name: "主管審核" },
+              { id: "approval-2", type: "approval", name: "財務審核" }
+            ]
+          },
+          {
+            id: "seed-leave-request",
+            name: "請假申請",
+            createdAt: "2026-04-06T09:30:00+08:00",
+            updatedAt: "2026-04-08T10:05:00+08:00",
+            flow: [
+              { id: "form-1", type: "form", name: "請假申請表單" },
+              { id: "condition-1", type: "condition", name: "天數判斷" },
+              { id: "approval-1", type: "approval", name: "主管審核" },
+              { id: "mail-1", type: "send-user", name: "寄送通知" }
+            ]
+          }
+        ];
+        localStorage.setItem(FLOWS_KEY, JSON.stringify(seed));
+        return seed;
       }
 
       function saveAllFlows(flows) {
@@ -1234,6 +1610,15 @@
         window.location.href = `./chat.html?id=${encodeURIComponent(id)}`;
       }
 
+      function openActionBuilder(template, name) {
+        const params = new URLSearchParams({
+          mode: "action",
+          template: template || "form",
+          name: name || "未命名 Action"
+        });
+        window.location.href = `./builder.html?${params.toString()}`;
+      }
+
       function editFlowName(id) {
         const flows = getAllFlows();
         const target = flows.find((x) => x.id === id);
@@ -1311,13 +1696,16 @@
         grid.innerHTML = flows.map((f) => `
           <article class="flow-card" data-open="${f.id}">
             <div class="flow-card-top">
-              <button class="flow-name" data-edit="${f.id}">${f.name || "未命名流程"}</button>
+              <div class="flow-card-title">
+                <span class="flow-card-icon">⚯</span>
+                <button class="flow-name" data-edit="${f.id}">${f.name || "未命名流程"}</button>
+              </div>
               <span class="dots">•••</span>
             </div>
             <div class="flow-desc">${snippet(f.flow)}</div>
             <div class="flow-meta">
               <div>更新時間：${fmtDateTime(f.updatedAt)}</div>
-              <div>建立者：me</div>
+              <div>建立者：fedgpt</div>
             </div>
             <div class="flow-hr"></div>
             <div class="flow-foot">
@@ -1360,8 +1748,9 @@
       }
 
       function switchPage(page) {
-        const nextPage = page === "credential" && CURRENT_ROLE !== "admin" ? "integration" : page;
-        ["flow-list", "interaction", "integration", "credential"].forEach((p) => {
+        const allowedPages = ROLE_PAGE_ACCESS[CURRENT_ROLE] || ROLE_PAGE_ACCESS.manager;
+        const nextPage = allowedPages.includes(page) ? page : "flow-list";
+        ["flow-list", "action-list", "marketplace", "interaction", "integration", "credential"].forEach((p) => {
           document.getElementById(`page-${p}`).classList.toggle("hidden", p !== nextPage);
         });
         document.querySelectorAll(".nav-btn").forEach((btn) => {
@@ -1369,8 +1758,25 @@
         });
       }
 
+      function applyRoleVisibility() {
+        const allowedPages = ROLE_PAGE_ACCESS[CURRENT_ROLE] || ROLE_PAGE_ACCESS.manager;
+        document.querySelectorAll(".nav-btn").forEach((btn) => {
+          const page = btn.getAttribute("data-page");
+          btn.classList.toggle("hidden", !allowedPages.includes(page));
+        });
+        const selector = document.getElementById("roleViewSelect");
+        if (selector) selector.value = CURRENT_ROLE;
+      }
+
       document.querySelectorAll(".nav-btn").forEach((btn) => {
         btn.addEventListener("click", () => switchPage(btn.getAttribute("data-page")));
+      });
+
+      document.querySelectorAll("[data-open-action]").forEach((card) => {
+        card.addEventListener("click", (e) => {
+          if (e.target.closest("button") && !e.target.closest(".flow-name")) return;
+          openActionBuilder(card.getAttribute("data-open-action"), card.getAttribute("data-action-name"));
+        });
       });
 
       const tabs = document.querySelectorAll(".tab");
@@ -1508,10 +1914,14 @@
       document.getElementById("credentialAccountInput")?.addEventListener("input", updateCreateButtonState);
       document.getElementById("credentialTokenInput")?.addEventListener("input", updateCreateButtonState);
 
-      if (CURRENT_ROLE !== "admin") {
-        document.getElementById("credentialNavBtn")?.classList.add("hidden");
-      }
+      document.getElementById("roleViewSelect")?.addEventListener("change", (e) => {
+        CURRENT_ROLE = e.target.value === "mis" ? "mis" : "manager";
+        localStorage.setItem(ROLE_KEY, CURRENT_ROLE);
+        applyRoleVisibility();
+        switchPage("flow-list");
+      });
 
+      applyRoleVisibility();
       switchPage("flow-list");
       renderFlowViews();
       renderCredentials();

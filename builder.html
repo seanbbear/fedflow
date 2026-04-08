@@ -203,6 +203,30 @@
         background: #f2e9e4;
       }
 
+      .action-btn[data-type="llm"] {
+        background: #e8e5ff;
+      }
+
+      .action-btn[data-type="assistant"] {
+        background: #e1ebff;
+      }
+
+      .action-btn[data-type="customFunction"] {
+        background: #f4e4ff;
+      }
+
+      .action-btn[data-type="conditionAgent"] {
+        background: #fde7de;
+      }
+
+      .action-btn[data-type="sticky"] {
+        background: #fff4cf;
+      }
+
+      .action-btn[data-type="http"] {
+        background: #ffe6f0;
+      }
+
       .action-btn[data-type="mailReader"] {
         background: #e0e4f7;
       }
@@ -308,6 +332,36 @@
       .canvas-node[data-type="tool"] {
         background: #f2e9e4;
         border-color: #e4d3c7;
+      }
+
+      .canvas-node[data-type="llm"] {
+        background: #e8e5ff;
+        border-color: #d0c8ff;
+      }
+
+      .canvas-node[data-type="assistant"] {
+        background: #e1ebff;
+        border-color: #c3d6ff;
+      }
+
+      .canvas-node[data-type="customFunction"] {
+        background: #f4e4ff;
+        border-color: #dfc2ff;
+      }
+
+      .canvas-node[data-type="conditionAgent"] {
+        background: #fde7de;
+        border-color: #f1c8b8;
+      }
+
+      .canvas-node[data-type="sticky"] {
+        background: #fff4cf;
+        border-color: #f1d47b;
+      }
+
+      .canvas-node[data-type="http"] {
+        background: #ffe6f0;
+        border-color: #f0bfd2;
       }
 
       .canvas-node[data-type="mailReader"] {
@@ -569,6 +623,8 @@
     <main class="app">
       <aside class="panel palette-panel">
         <div class="panel-head">
+          <h2 id="paletteTitle">Action 清單</h2>
+          <p id="paletteDesc">拖曳加入畫布開始編排</p>
           <input class="palette-search" id="paletteSearch" placeholder="依照名稱或用途搜尋" />
         </div>
         <div class="palette-list" id="palette"></div>
@@ -577,11 +633,11 @@
       <section class="panel canvas-panel">
         <div class="panel-head">
           <h2 id="flowTitle">未命名流程</h2>
-          <p>拖曳左側 Action 到畫布，點選節點後可編輯設定</p>
+          <p id="canvasDesc">拖曳左側 Action 到畫布，點選節點後可編輯設定</p>
         </div>
         <div class="flow-topbar">
           <span class="chip" id="flowCount">0 actions</span>
-          <p class="hint">可拖曳節點調整位置</p>
+          <p class="hint" id="canvasHint">可拖曳節點調整位置</p>
           <div class="flow-tools"></div>
         </div>
         <div class="canvas-wrap">
@@ -609,6 +665,8 @@
         mailReader: { name: "讀取信件 Mail Reader", desc: "讀取信件轉為 mail.* 變數" }
       };
 
+      const params = new URLSearchParams(window.location.search);
+      const builderMode = params.get("mode") === "action" ? "action" : "flow";
       const members = ["Benson", "Sunny", "Sean", "Henry", "HR", "Ethan", "Cheen"];
       const providers = [
         "FedGPT Agentic RAG",
@@ -627,11 +685,33 @@
       let suppressCanvasCancelOnce = false;
       let draftSaveTimer = null;
       let canvasRenderRaf = null;
-      const DRAFT_KEY = "fedflow:builder:draft";
-      const PUBLISHED_KEY = "fedflow:builder:published";
+      const DRAFT_KEY = builderMode === "action" ? "fedflow:action-builder:draft" : "fedflow:builder:draft";
+      const PUBLISHED_KEY = builderMode === "action" ? "fedflow:action-builder:published" : "fedflow:builder:published";
       const FLOWS_KEY = "fedflow:flows";
+      const ACTIONS_KEY = "fedflow:actions";
       let currentFlowId = null;
       let currentFlowName = "未命名流程";
+
+      function getModeLabel() {
+        return builderMode === "action" ? "節點" : "Action";
+      }
+
+      function getCountLabel() {
+        return builderMode === "action" ? "nodes" : "actions";
+      }
+
+      function getPaletteMeta() {
+        if (builderMode !== "action") return actionMeta;
+        return {
+          tool: { name: "工具", desc: "呼叫外部工具或 API" },
+          llm: { name: "語言模型", desc: "使用大型語言模型生成內容" },
+          assistant: { name: "AI 助手", desc: "依照指令動態選擇工具與進行推論" },
+          customFunction: { name: "自訂函式", desc: "執行自訂 JavaScript 或 Python 函式" },
+          conditionAgent: { name: "條件代理", desc: "根據條件切換處理路徑與後續節點" },
+          sticky: { name: "便利貼", desc: "加入備註、設計說明或流程提示" },
+          http: { name: "HTTP", desc: "透過 HTTP request 串接外部服務" }
+        };
+      }
 
       function uid() {
         return Math.random().toString(36).slice(2, 9);
@@ -657,19 +737,42 @@
         localStorage.setItem(FLOWS_KEY, JSON.stringify(flows));
       }
 
+      function getAllActions() {
+        try {
+          const parsed = JSON.parse(localStorage.getItem(ACTIONS_KEY) || "[]");
+          return Array.isArray(parsed) ? parsed : [];
+        } catch (err) {
+          return [];
+        }
+      }
+
+      function saveAllActions(actions) {
+        localStorage.setItem(ACTIONS_KEY, JSON.stringify(actions));
+      }
+
       function upsertCurrentFlow() {
         if (!currentFlowId) currentFlowId = uid();
-        const all = getAllFlows();
         const now = new Date().toISOString();
-        const idx = all.findIndex((x) => x.id === currentFlowId);
         const payload = {
           id: currentFlowId,
           name: currentFlowName || "未命名流程",
           flow,
           edges,
-          updatedAt: now,
-          createdAt: idx >= 0 ? all[idx].createdAt || now : now
+          mode: builderMode,
+          updatedAt: now
         };
+        if (builderMode === "action") {
+          const all = getAllActions();
+          const idx = all.findIndex((x) => x.id === currentFlowId);
+          payload.createdAt = idx >= 0 ? all[idx].createdAt || now : now;
+          if (idx >= 0) all[idx] = payload;
+          else all.unshift(payload);
+          saveAllActions(all);
+          return payload;
+        }
+        const all = getAllFlows();
+        const idx = all.findIndex((x) => x.id === currentFlowId);
+        payload.createdAt = idx >= 0 ? all[idx].createdAt || now : now;
         if (idx >= 0) all[idx] = payload;
         else all.unshift(payload);
         saveAllFlows(all);
@@ -677,7 +780,7 @@
       }
 
       function updateFlowCount() {
-        document.getElementById("flowCount").textContent = `${flow.length} actions / ${edges.length} links`;
+        document.getElementById("flowCount").textContent = `${flow.length} ${getCountLabel()} / ${edges.length} links`;
       }
 
       function persistDraftNow() {
@@ -770,6 +873,24 @@
         if (type === "mailReader") {
           return { mailbox: "service@fedflow.local", mode: "基礎", from: "", to: "", subject: "", query: "", scope: "最新一封", n: 5, download: false, markRead: false };
         }
+        if (type === "llm") {
+          return { prompt: "", model: "gpt-4.1", temperature: 0.7 };
+        }
+        if (type === "assistant") {
+          return { instruction: "", strategy: "auto" };
+        }
+        if (type === "customFunction") {
+          return { runtime: "JavaScript", entry: "main", code: "" };
+        }
+        if (type === "conditionAgent") {
+          return { rule: "", trueLabel: "符合", falseLabel: "不符合" };
+        }
+        if (type === "sticky") {
+          return { note: "在這裡輸入說明..." };
+        }
+        if (type === "http") {
+          return { method: "GET", url: "", headers: "", body: "" };
+        }
         return {};
       }
 
@@ -778,7 +899,8 @@
       }
 
       function getNodeName(item) {
-        return (item?.name || "").trim() || actionMeta[item.type]?.name || "Action";
+        const meta = getPaletteMeta();
+        return (item?.name || "").trim() || meta[item.type]?.name || getModeLabel();
       }
 
       function setConfig(patch, rerenderConfig = false, rerenderCanvas = true) {
@@ -804,10 +926,11 @@
       }
 
       function renderPalette() {
+        const metaMap = getPaletteMeta();
         const palette = document.getElementById("palette");
         const q = (document.getElementById("paletteSearch")?.value || "").trim().toLowerCase();
         palette.innerHTML = "";
-        Object.entries(actionMeta)
+        Object.entries(metaMap)
           .filter(([, meta]) => {
             if (!q) return true;
             return `${meta.name} ${meta.desc}`.toLowerCase().includes(q);
@@ -843,7 +966,7 @@
         if (flow.length === 0) {
           const empty = document.createElement("div");
           empty.className = "canvas-empty";
-          empty.innerHTML = `<div><strong>把左側 Action 拖進來開始建流程</strong><div class="hint">也可直接點擊 Action 加入</div></div>`;
+          empty.innerHTML = `<div><strong>把左側${getModeLabel()}拖進來開始編排</strong><div class="hint">也可直接點擊加入</div></div>`;
           canvas.appendChild(empty);
         }
         flow.forEach((item, i) => {
@@ -1132,6 +1255,12 @@
         if (item.type === "agent") return `${c.task || "任務"} / max ${c.maxToken}`;
         if (item.type === "tool") return `${c.provider} / ${c.taskType}`;
         if (item.type === "mailReader") return `${c.mailbox} / ${c.scope}`;
+        if (item.type === "llm") return c.model || "待設定模型";
+        if (item.type === "assistant") return c.strategy === "auto" ? "自動選擇工具" : (c.strategy || "待設定策略");
+        if (item.type === "customFunction") return `${c.runtime || "Runtime"} / ${c.entry || "entry"}`;
+        if (item.type === "conditionAgent") return c.rule || "待設定條件";
+        if (item.type === "sticky") return c.note || "備註";
+        if (item.type === "http") return `${c.method || "GET"} ${c.url || "待設定 URL"}`;
         return "";
       }
 
@@ -1144,13 +1273,13 @@
         const hint = document.getElementById("configHint");
         const active = getActive();
         if (!active) {
-          container.innerHTML = `<p class="hint">從左側加入 Action，並在中間點選要設定的節點。</p>`;
-          hint.textContent = "請先在中間選一個 Action";
+          container.innerHTML = `<p class="hint">從左側加入${getModeLabel()}，並在中間點選要設定的項目。</p>`;
+          hint.textContent = `請先在中間選一個${getModeLabel()}`;
           document.body.classList.remove("config-open");
           return;
         }
         document.body.classList.add("config-open");
-        hint.textContent = actionMeta[active.type].name;
+        hint.textContent = getPaletteMeta()[active.type].name;
         if (active.type === "form") renderFormConfig(active, container);
         else if (active.type === "condition") renderConditionConfig(active, container);
         else if (active.type === "approval") renderApprovalConfig(active, container);
@@ -1158,15 +1287,18 @@
         else if (active.type === "agent") renderAgentConfig(active, container);
         else if (active.type === "tool") renderToolConfig(active, container);
         else if (active.type === "mailReader") renderMailReaderConfig(active, container);
+        else renderGenericNodeConfig(active, container);
         renderCommonActionName(active, container);
       }
 
       function renderCommonActionName(active, container) {
+        const itemLabel = getModeLabel();
+        const meta = getPaletteMeta();
         const wrap = document.createElement("div");
         wrap.className = "section";
         wrap.innerHTML = `
-          <h3>Action 基本設定</h3>
-          ${row("Action 名稱", `<input id="common_name" value="${escapeHtml(active.name || "")}" placeholder="${escapeHtml(actionMeta[active.type].name)}" />`)}
+          <h3>${itemLabel}基本設定</h3>
+          ${row(`${itemLabel}名稱`, `<input id="common_name" value="${escapeHtml(active.name || "")}" placeholder="${escapeHtml(meta[active.type].name)}" />`)}
         `;
         container.prepend(wrap);
         container.querySelector("#common_name").oninput = (e) => {
@@ -1492,6 +1624,91 @@
         container.querySelector("#m_read").onchange = (e) => setConfig({ markRead: e.target.checked });
       }
 
+      function renderGenericNodeConfig(active, container) {
+        const c = active.config || {};
+        if (active.type === "llm") {
+          container.innerHTML = `
+            <div class="section">
+              <h3>語言模型設定</h3>
+              ${row("模型", `<input id="g_model" value="${escapeHtml(c.model || "")}" />`)}
+              ${row("Prompt", `<textarea id="g_prompt">${escapeHtml(c.prompt || "")}</textarea>`)}
+              ${row("Temperature", `<input id="g_temp" type="number" step="0.1" value="${escapeHtml(c.temperature ?? 0.7)}" />`)}
+            </div>
+          `;
+          container.querySelector("#g_model").oninput = (e) => setConfig({ model: e.target.value });
+          container.querySelector("#g_prompt").oninput = (e) => setConfig({ prompt: e.target.value });
+          container.querySelector("#g_temp").oninput = (e) => setConfig({ temperature: Number(e.target.value) || 0 });
+          return;
+        }
+        if (active.type === "assistant") {
+          container.innerHTML = `
+            <div class="section">
+              <h3>AI 助手設定</h3>
+              ${row("策略", `<select id="a_strategy"><option value="auto" ${c.strategy === "auto" ? "selected" : ""}>auto</option><option value="manual" ${c.strategy === "manual" ? "selected" : ""}>manual</option></select>`)}
+              ${row("指令", `<textarea id="a_instruction">${escapeHtml(c.instruction || "")}</textarea>`)}
+            </div>
+          `;
+          container.querySelector("#a_strategy").onchange = (e) => setConfig({ strategy: e.target.value });
+          container.querySelector("#a_instruction").oninput = (e) => setConfig({ instruction: e.target.value });
+          return;
+        }
+        if (active.type === "customFunction") {
+          container.innerHTML = `
+            <div class="section">
+              <h3>自訂函式設定</h3>
+              ${row("Runtime", `<select id="f_runtime"><option ${c.runtime === "JavaScript" ? "selected" : ""}>JavaScript</option><option ${c.runtime === "Python" ? "selected" : ""}>Python</option></select>`)}
+              ${row("Entry", `<input id="f_entry" value="${escapeHtml(c.entry || "")}" />`)}
+              ${row("程式碼", `<textarea id="f_code">${escapeHtml(c.code || "")}</textarea>`)}
+            </div>
+          `;
+          container.querySelector("#f_runtime").onchange = (e) => setConfig({ runtime: e.target.value });
+          container.querySelector("#f_entry").oninput = (e) => setConfig({ entry: e.target.value });
+          container.querySelector("#f_code").oninput = (e) => setConfig({ code: e.target.value });
+          return;
+        }
+        if (active.type === "conditionAgent") {
+          container.innerHTML = `
+            <div class="section">
+              <h3>條件代理設定</h3>
+              ${row("條件規則", `<textarea id="c_rule">${escapeHtml(c.rule || "")}</textarea>`)}
+              ${row("符合標籤", `<input id="c_true_label" value="${escapeHtml(c.trueLabel || "符合")}" />`)}
+              ${row("不符合標籤", `<input id="c_false_label" value="${escapeHtml(c.falseLabel || "不符合")}" />`)}
+            </div>
+          `;
+          container.querySelector("#c_rule").oninput = (e) => setConfig({ rule: e.target.value });
+          container.querySelector("#c_true_label").oninput = (e) => setConfig({ trueLabel: e.target.value });
+          container.querySelector("#c_false_label").oninput = (e) => setConfig({ falseLabel: e.target.value });
+          return;
+        }
+        if (active.type === "sticky") {
+          container.innerHTML = `
+            <div class="section">
+              <h3>便利貼內容</h3>
+              ${row("備註", `<textarea id="s_note">${escapeHtml(c.note || "")}</textarea>`)}
+            </div>
+          `;
+          container.querySelector("#s_note").oninput = (e) => setConfig({ note: e.target.value });
+          return;
+        }
+        if (active.type === "http") {
+          container.innerHTML = `
+            <div class="section">
+              <h3>HTTP 設定</h3>
+              ${row("Method", `<select id="h_method"><option ${c.method === "GET" ? "selected" : ""}>GET</option><option ${c.method === "POST" ? "selected" : ""}>POST</option><option ${c.method === "PUT" ? "selected" : ""}>PUT</option><option ${c.method === "DELETE" ? "selected" : ""}>DELETE</option></select>`)}
+              ${row("URL", `<input id="h_url" value="${escapeHtml(c.url || "")}" />`)}
+              ${row("Headers", `<textarea id="h_headers">${escapeHtml(c.headers || "")}</textarea>`)}
+              ${row("Body", `<textarea id="h_body">${escapeHtml(c.body || "")}</textarea>`)}
+            </div>
+          `;
+          container.querySelector("#h_method").onchange = (e) => setConfig({ method: e.target.value });
+          container.querySelector("#h_url").oninput = (e) => setConfig({ url: e.target.value });
+          container.querySelector("#h_headers").oninput = (e) => setConfig({ headers: e.target.value });
+          container.querySelector("#h_body").oninput = (e) => setConfig({ body: e.target.value });
+          return;
+        }
+        container.innerHTML = `<div class="section"><h3>節點設定</h3><p class="hint">此節點目前使用通用設定。</p></div>`;
+      }
+
       function escapeHtml(str) {
         return String(str || "")
           .replaceAll("&", "&amp;")
@@ -1507,7 +1724,7 @@
         window.location.href = "./index.html";
       };
       document.getElementById("editFlowNameBtn").onclick = () => {
-        const next = window.prompt("流程名稱", currentFlowName);
+        const next = window.prompt(builderMode === "action" ? "Action 名稱" : "流程名稱", currentFlowName);
         if (next == null) return;
         setFlowName(next);
         saveDraft();
@@ -1517,7 +1734,7 @@
         const payload = upsertCurrentFlow();
         localStorage.setItem(PUBLISHED_KEY, JSON.stringify({ ...payload, version: 1, savedAt: payload.updatedAt }));
         saveDraft(true);
-        alert("流程已儲存");
+        alert(builderMode === "action" ? "Action 已儲存" : "流程已儲存");
       };
 
       const canvasEl = document.getElementById("canvas");
@@ -1552,7 +1769,7 @@
         e.preventDefault();
         canvasEl.classList.remove("dropping");
         const type = e.dataTransfer.getData("text/action-type");
-        if (!type || !actionMeta[type]) return;
+        if (!type || !getPaletteMeta()[type]) return;
         const rect = canvasEl.getBoundingClientRect();
         addAction(type, { x: e.clientX - rect.left - 125, y: e.clientY - rect.top - 40 });
       });
@@ -1563,10 +1780,11 @@
         renderEdges(svg, canvasEl);
       });
 
-      const params = new URLSearchParams(window.location.search);
       const flowIdFromQuery = params.get("id");
       if (flowIdFromQuery) {
-        const target = getAllFlows().find((x) => x.id === flowIdFromQuery);
+        const target = builderMode === "action"
+          ? getAllActions().find((x) => x.id === flowIdFromQuery)
+          : getAllFlows().find((x) => x.id === flowIdFromQuery);
         if (target) {
           currentFlowId = target.id;
           setFlowName(target.name || "未命名流程");
@@ -1592,6 +1810,18 @@
         }
       }
       if (!currentFlowId) currentFlowId = uid();
+      if (!flow.length && builderMode === "action") {
+        const templateType = params.get("template");
+        if (templateType && getPaletteMeta()[templateType]) {
+          addAction(templateType, { x: 88, y: 88 });
+        }
+      }
+      if (params.get("name")) setFlowName(params.get("name"));
+      document.getElementById("paletteTitle").textContent = builderMode === "action" ? "節點清單" : "Action 清單";
+      document.getElementById("paletteDesc").textContent = builderMode === "action" ? "拖曳節點加入 Action Canvas" : "拖曳加入畫布開始編排";
+      document.getElementById("paletteSearch").placeholder = builderMode === "action" ? "依照節點名稱或用途搜尋" : "依照名稱或用途搜尋";
+      document.getElementById("canvasDesc").textContent = builderMode === "action" ? "拖曳左側節點到畫布，點選節點後可編輯設定" : "拖曳左側 Action 到畫布，點選節點後可編輯設定";
+      document.getElementById("canvasHint").textContent = builderMode === "action" ? "可拖曳節點調整 Action 內部結構" : "可拖曳節點調整位置";
       if (!document.getElementById("flowTitle").textContent.trim()) setFlowName("未命名流程");
 
       renderPalette();
